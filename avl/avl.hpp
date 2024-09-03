@@ -20,6 +20,7 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
     };
 
     avl_node* root_;
+    KeyT max_key_;
 
 private:
     int get_node_size(avl_node* node) {
@@ -112,6 +113,78 @@ private:
         update_Nchilds(node);
     }
 
+    avl_node* get_parent_bigger(avl_node* node, KeyT key) {
+        avl_node* ans_node = node;
+        KeyT      ans_key  = max_key_;
+        for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
+            if (node_iter->key_ > key && node_iter->key_ < ans_key) {
+                ans_node = node_iter;
+                ans_key  = node_iter->key_;
+            }
+        }
+        return ans_node;
+    }
+
+    avl_node* lower_bound(KeyT key) {
+        avl_node* current = root_;
+        while (true) {
+            if (key == current->key_) {
+                return current;
+            } else if (key < current->key_) {
+                if (current->left_)
+                    current = current->left_;
+                else
+                    return get_parent_bigger(current, key);
+            } else {
+                if (current->right_)
+                    current = current->right_;
+                else
+                    return get_parent_bigger(current, key);
+            }
+        }
+        return nullptr;
+    }
+
+    avl_node* upper_bound(KeyT key) {
+        avl_node* current = root_;
+        while (true) {
+            if (key < current->key_) {
+                if (current->left_)
+                    current = current->left_;
+                else
+                    return get_parent_bigger(current, key);
+            } else {
+                if (current->right_)
+                    current = current->right_;
+                else
+                    return get_parent_bigger(current, key);
+            }
+        }
+        return nullptr;
+    }
+
+    int size_left_side(KeyT key) {
+        int dist = 0;
+        avl_node* current = root_;
+        while (true) {
+            if (key == current->key_) {
+                return dist + current->Nleft_;
+            } else if (key < current->key_) {
+                if (current->left_)
+                    current = current->left_;
+                else
+                    break;
+            } else {
+                dist += current->Nleft_ + 1;
+                if (current->right_)
+                    current = current->right_;
+                else
+                    break;
+            }
+        }
+        return dist;
+    }
+
     void print_recursive(const avl_node* const node) {
         if (!node) return;
 
@@ -141,7 +214,7 @@ private:
     }
 
 public:
-    avl_t() : root_(nullptr) {}
+    avl_t(KeyT max_key) : root_(nullptr), max_key_(max_key) {}
 
     avl_node* insert(const KeyT& key) {
         avl_node* new_node = new avl_node{key};
@@ -154,7 +227,10 @@ public:
         avl_node* current = root_;
         avl_node* destination;
         while (true) {
-            if (key < current->key_) {
+            if (key == current->key_) {
+                delete new_node;
+                return current;
+            } else if (key < current->key_) {
                 if (current->left_) {
                     current = current->left_;
                 } else {
@@ -182,8 +258,20 @@ public:
         return current;
     }
 
-    int check_range(int left_border, int right_border) {
-        return -1;
+    int check_range(KeyT first_key, KeyT second_key) {
+        if (first_key >= second_key)
+            return 0;
+
+        avl_node* left  = lower_bound(first_key);
+        avl_node* right = upper_bound(second_key);
+
+        int border = -1;
+        if (first_key < left->key_)
+            border++;
+        if (second_key >= right->key_)
+            border++;
+
+        return size_left_side(right->key_) - size_left_side(left->key_) + border;
     }
 
     void print() {

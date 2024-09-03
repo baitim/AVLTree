@@ -3,26 +3,26 @@
 
 int main()
 {
-    avl_tree::avl_t<int> avl_tree;
+    avl_tree::avl_t<int> avl_tree(INT32_MAX);
 
     char command;
     while(std::cin >> command) {
 
-        int elem, left_border, right_border, count;
+        int first_key, second_key, answer;
         switch (command) {
             case 'k':
-                std::cin >> elem;
-                avl_tree.insert(elem);
+                std::cin >> first_key;
+                avl_tree.insert(first_key);
                 break;
 
             case 'q':
-                std::cin >> left_border >> right_border;
-                count = avl_tree.check_range(left_border, right_border);
-                std::cout << count << ' ';
+                std::cin >> first_key >> second_key;
+                answer = avl_tree.check_range(first_key, second_key);
+                std::cout << answer << ' ';
                 break;
 
             default:
-                std::cout << print_lred("Error input, need key \"k\" or \"q\"");
+                std::cout << print_lred("Error input, need key \"k\" or \"q\"\n");
                 return 0;
         }
 
