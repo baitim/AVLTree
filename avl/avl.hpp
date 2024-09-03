@@ -19,6 +19,7 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
                              parent_(nullptr), left_(nullptr), right_(nullptr) {}
     };
 
+    CompT comp_func;
     avl_node* root_;
     KeyT max_key_;
 
@@ -74,7 +75,7 @@ private:
         if (node == root_) {
             root_ = node_left_old;
         } else {
-            if (node->key_ < node->parent_->key_)
+            if (comp_func(node->key_, node->parent_->key_))
                 node->parent_->left_  = node_left_old;
             else
                 node->parent_->right_ = node_left_old;
@@ -98,7 +99,7 @@ private:
         if (node == root_) {
             root_ = node_right_old;
         } else {
-            if (node->key_ < node->parent_->key_)
+            if (comp_func(node->key_, node->parent_->key_))
                 node->parent_->left_  = node_right_old;
             else
                 node->parent_->right_ = node_right_old;
@@ -117,7 +118,9 @@ private:
         avl_node* ans_node = node;
         KeyT      ans_key  = max_key_;
         for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
-            if (node_iter->key_ > key && node_iter->key_ < ans_key) {
+            if (!comp_func(node_iter->key_, key) && node_iter->key_ != key &&
+                comp_func(node_iter->key_, ans_key)) {
+
                 ans_node = node_iter;
                 ans_key  = node_iter->key_;
             }
@@ -130,7 +133,7 @@ private:
         while (true) {
             if (key == current->key_) {
                 return current;
-            } else if (key < current->key_) {
+            } else if (comp_func(key, current->key_)) {
                 if (current->left_)
                     current = current->left_;
                 else
@@ -148,7 +151,7 @@ private:
     avl_node* upper_bound(KeyT key) {
         avl_node* current = root_;
         while (true) {
-            if (key < current->key_) {
+            if (comp_func(key, current->key_)) {
                 if (current->left_)
                     current = current->left_;
                 else
@@ -169,7 +172,7 @@ private:
         while (true) {
             if (key == current->key_) {
                 return dist + current->Nleft_;
-            } else if (key < current->key_) {
+            } else if (comp_func(key, current->key_)) {
                 if (current->left_)
                     current = current->left_;
                 else
@@ -230,7 +233,7 @@ public:
             if (key == current->key_) {
                 delete new_node;
                 return current;
-            } else if (key < current->key_) {
+            } else if (comp_func(key, current->key_)) {
                 if (current->left_) {
                     current = current->left_;
                 } else {
@@ -266,7 +269,7 @@ public:
         avl_node* right = upper_bound(second_key);
 
         int border = -1;
-        if (first_key < left->key_)
+        if (first_key <= left->key_)
             border++;
         if (second_key >= right->key_)
             border++;
