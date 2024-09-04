@@ -1,10 +1,12 @@
 #include <iostream>
+#include <ctime>
 #include "avl.hpp"
 
 int main()
 {
     avl_tree::avl_t<int> avl_tree(INT32_MAX);
 
+    clock_t time_start = clock();
     char command;
     while(std::cin >> command) {
 
@@ -18,7 +20,6 @@ int main()
             case 'q':
                 std::cin >> first_key >> second_key;
                 answer = avl_tree.check_range(first_key, second_key);
-                std::cout << answer << ' ';
                 break;
 
             default:
@@ -30,7 +31,9 @@ int main()
         avl_tree.print();
 #endif
     }
-    std::cout << '\n';
+    clock_t time_end = clock();
+    double time =  (static_cast<double>(time_end - time_start)) / CLOCKS_PER_SEC;
+    std::cout << time << "\n";
 
     return 0;
 }

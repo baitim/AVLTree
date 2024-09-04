@@ -10,4 +10,4 @@ endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -D DEBUG -O0 -fsanitize=address -fsanitize=undefined")
 
-add_subdirectory(./avl)
+add_subdirectory(./tests)

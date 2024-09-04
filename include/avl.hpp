@@ -59,13 +59,31 @@ private:
             if (node_iter->right_)
                 balance_diff -= node_iter->right_->height_;
 
+            int left_height = 0;
+            int right_height = 0;
             if (balance_diff > 1) {
-                if (node_iter->left_->Nleft_ < node_iter->left_->Nright_)
+                avl_node* left = node_iter->left_;
+                if (left->left_)
+                    left_height = left->left_->height_;
+
+                if (left->right_)
+                    right_height = left->right_->height_;
+
+                if (left_height < right_height)
                     rotate_left(node_iter->left_);
                 rotate_right(node_iter);
                 
             } else if (balance_diff < -1) {
-                if (node_iter->right_->Nleft_ > node_iter->right_->Nright_)
+                avl_node* right = node_iter->right_;
+                int left_height = 0;
+                if (right->left_)
+                    left_height = right->left_->height_;
+
+                int right_height = 0;
+                if (right->right_)
+                    right_height = right->right_->height_;
+
+                if (left_height > right_height)
                     rotate_right(node_iter->right_);
                 rotate_left(node_iter);
             }
