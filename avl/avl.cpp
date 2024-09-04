@@ -22,7 +22,7 @@ int main()
                 break;
 
             default:
-                std::cout << print_lred("Error input, need key \"k\" or \"q\"\n");
+                std::cerr << print_lred("Error input, need key \"k\" or \"q\"\n");
                 return 0;
         }
 

@@ -59,10 +59,16 @@ private:
             if (node_iter->right_)
                 balance_diff -= node_iter->right_->height_;
 
-            if (balance_diff > 1)
+            if (balance_diff > 1) {
+                if (node_iter->left_->Nleft_ < node_iter->left_->Nright_)
+                    rotate_left(node_iter->left_);
                 rotate_right(node_iter);
-            else if (balance_diff < -1)
+                
+            } else if (balance_diff < -1) {
+                if (node_iter->right_->Nleft_ > node_iter->right_->Nright_)
+                    rotate_right(node_iter->right_);
                 rotate_left(node_iter);
+            }
         }
     }
 
@@ -193,27 +199,36 @@ private:
 
         print_recursive(node->left_);
 
-        std::cerr << print_lcyan(node->key_) << print_lcyan("(");
+        std::cerr << print_lcyan(node->key_ << "\t(");
 
         if (node->left_)
-            std::cerr << print_lcyan(node->left_->key_) << print_lcyan(", "); 
+            std::cerr << print_lcyan(node->left_->key_ << ",\t");
         else
-            std::cerr << print_lcyan("none") << print_lcyan(", "); 
+            std::cerr << print_lcyan("none" << ",\t");
 
         if (node->right_)
-            std::cerr << print_lcyan(node->right_->key_) << print_lcyan(")") << '\n'; 
+            std::cerr << print_lcyan(node->right_->key_ << ",\t");
         else
-            std::cerr << print_lcyan("none") << print_lcyan(")") << '\n'; 
+            std::cerr << print_lcyan("none" << ",\t");
+
+        if (node->parent_)
+            std::cerr << print_lcyan(node->parent_->key_ << ",\t");
+        else
+            std::cerr << print_lcyan("none" << ",\t");
+
+        std::cerr << print_lcyan(node->Nleft_  << ",\t" << node->Nright_ << ",\t" <<
+                                 node->height_ << ")\n");
 
         print_recursive(node->right_);
     }
 
-    void delete_avl_tree(avl_node* node)
-    {
-        if(!node) return;
-        delete_avl_tree(node->left_);
-        delete_avl_tree(node->right_);
-        delete node;
+    void decrement_parents_size(avl_node* node) {
+        for (avl_node* node_iter = node; node_iter->parent_ != nullptr; node_iter = node_iter->parent_) {
+            if (node_iter->parent_->left_ == node_iter)
+                node_iter->parent_->Nleft_--;
+            else
+                node_iter->parent_->Nright_--;
+        }
     }
 
 public:
@@ -262,7 +277,7 @@ public:
     }
 
     int check_range(KeyT first_key, KeyT second_key) {
-        if (first_key >= second_key)
+        if (first_key >= second_key || !root_)
             return 0;
 
         avl_node* left  = lower_bound(first_key);
@@ -278,16 +293,50 @@ public:
     }
 
     void print() {
-        std::cout << print_lblue("\nAVL Tree (childs in scopes) with root ") <<
-                     print_lblue(root_->key_) << print_lblue(":\n");
+        if (!root_)
+            return;
+
+        std::cerr << print_lblue("\nAVL Tree with root = " << root_->key_ <<
+                                 ":\nkey(<child>, <child>, <parent>, <Nleft>, <Nright>, <height>):\n");
 
         print_recursive(root_);
-        std::cout << '\n';
+        std::cerr << '\n';
     }
 
     ~avl_t()
     {
-        delete_avl_tree(root_);
+        avl_node* current = root_;
+        while (true) {
+
+            if (current->Nleft_ > 0) {
+                int node_left_size = get_node_size(current->left_);
+
+                if (node_left_size == 1) {
+                    decrement_parents_size(current->left_);
+                    delete current->left_;
+                } else if (node_left_size > 1) {
+                    current = current->left_;
+                }
+
+            } else if (current->Nright_ > 0) {
+                int node_right_size = get_node_size(current->right_);
+
+                if (node_right_size == 1) {
+                    decrement_parents_size(current->right_);
+                    delete current->right_;
+                } else if (node_right_size > 1) {
+                    current = current->right_;
+                }
+
+            } else {
+                if (current->parent_)
+                    current = current->parent_;
+                else
+                    break;
+            }
+        }
+
+        delete root_;
     }
 };
 
