@@ -16,21 +16,27 @@
     write <code>cmake . -B build ; cmake --build build</code> in terminal
 
 4. Run <br>
-    for AVL: write <code>./build/tests/avl</code> in terminal <br>
-    for set: write <code>./build/tests/set</code> in terminal <br>
+    write <code>./build/tests/end_to_end/avl</code> in terminal <br>
 
-## How to compare
+## How to test
 
-1. Go to folder <br>
-    write <code>cd tests</code> in terminal
+1. Prepare
+    - Go to folder <br>
+        write <code>cd tests</code> in terminal
 
-2. Generate tests <br>
-    write <code>python3 generate.py</code> in terminal
+    - Generate tests <br>
+        write <code>python3 generate.py</code> in terminal
 
-3. Run comparing <br>
-    write <code>./run_tests.sh</code> in terminal
+2. Testing
+    - Compare <br>
+        write <code>cd compare</code> in terminal <br>
+        write <code>./run_compare.sh</code> in terminal <br>
+        The result of the comparison will be in the "compare.out" file
 
-The result of the comparison will be in the "answer.dat" file
+    - End to end <br>
+        write <code>cd end_to_end</code> in terminal <br>
+        write <code>python3 run_end_to_end.py</code> in terminal <br>
+        The test result will be in the "answers/answer_*.out" file
 
 <p align="center"><img src="https://github.com/baitim/AVL_tree/blob/main/images/cat.gif" width="40%"></p>
 

@@ -2,7 +2,7 @@ import random
 count_tests = 5
 
 for test_num in range(0, count_tests) :
-    file_name = "tests_dat/test_" + f'{test_num+1:03}' + ".dat"
+    file_name = "tests_dat/test_" + f'{test_num+1:03}' + ".in"
     file = open(file_name, 'w')
 
     count_inserts = random.randint(30000, 40000)

@@ -1,0 +1,6 @@
+file							avl_time	set_time	ratio
+../tests_dat/test_001.in		0.0435		1.8328		42.08
+../tests_dat/test_002.in		0.0467		2.6334		56.27
+../tests_dat/test_003.in		0.0615		3.1616		51.40
+../tests_dat/test_004.in		0.0361		1.8078		49.98
+../tests_dat/test_005.in		0.0434		2.5300		58.18
