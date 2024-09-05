@@ -17,6 +17,9 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
 
         avl_node(KeyT key) : key_(key), height_(0), Nleft_(0), Nright_(0),
                              parent_(nullptr), left_(nullptr), right_(nullptr) {}
+        avl_node(avl_node* node) : key_(node->key_), height_(node->height_),
+                                   Nleft_(node->Nleft_), Nright_(node->Nright_),
+                                   parent_(node->parent_), left_(node->left_), right_(node->right_) {}
     };
 
     CompT comp_func;
@@ -251,6 +254,42 @@ private:
 
 public:
     avl_t(KeyT max_key) : root_(nullptr), max_key_(max_key) {}
+
+    avl_t(const avl_t& other) {
+        avl_node* curr_other = other.root_;
+        root_ = new avl_node{curr_other};
+        avl_node* curr_this = root_;
+
+        while (true) {
+            if (curr_other->left_ && !curr_this->left_) {
+                curr_other       = curr_other->left_;
+                curr_this->left_ = new avl_node{curr_other};
+                curr_this        = curr_this->left_;
+
+            } else if (curr_other->right_ && !curr_this->right_) {
+                curr_other        = curr_other->right_;
+                curr_this->right_ = new avl_node{curr_other};
+                curr_this         = curr_this->right_;
+
+            } else {
+                if (curr_other->parent_) {
+                    curr_other = curr_other->parent_;
+                    curr_this  = curr_this->parent_;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+    avl_t& operator=(const avl_t& other) {
+        if (this == &other)
+            return *this;
+
+        avl_t<KeyT, CompT> new_tree{other};
+        std::swap(root_, new_tree.root_);
+        return *this;
+    }
 
     avl_node* insert(const KeyT& key) {
         avl_node* new_node = new avl_node{key};
