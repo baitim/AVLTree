@@ -24,7 +24,7 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
     KeyT max_key_;
 
 private:
-    int get_node_size(avl_node* node) {
+    int get_node_size(avl_node* node) const {
         if (!node)
             return 0;
 
@@ -138,7 +138,7 @@ private:
         update_Nchilds(node);
     }
 
-    avl_node* get_parent_bigger(avl_node* node, KeyT key) {
+    avl_node* get_parent_bigger(avl_node* node, KeyT key) const {
         avl_node* ans_node = node;
         KeyT      ans_key  = max_key_;
         for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
@@ -152,7 +152,7 @@ private:
         return ans_node;
     }
 
-    avl_node* lower_bound(KeyT key) {
+    avl_node* lower_bound(KeyT key) const {
         avl_node* current = root_;
         while (true) {
             if (key == current->key_) {
@@ -172,7 +172,7 @@ private:
         return nullptr;
     }
 
-    avl_node* upper_bound(KeyT key) {
+    avl_node* upper_bound(KeyT key) const {
         avl_node* current = root_;
         while (true) {
             if (comp_func(key, current->key_)) {
@@ -190,7 +190,7 @@ private:
         return nullptr;
     }
 
-    int size_left_side(KeyT key) {
+    int size_left_side(KeyT key) const {
         int dist = 0;
         avl_node* current = root_;
         while (true) {
@@ -212,7 +212,7 @@ private:
         return dist;
     }
 
-    void print_recursive(const avl_node* const node) {
+    void print_recursive(const avl_node* const node) const {
         if (!node) return;
 
         print_recursive(node->left_);
@@ -294,7 +294,7 @@ public:
         return current;
     }
 
-    int check_range(KeyT first_key, KeyT second_key) {
+    int check_range(KeyT first_key, KeyT second_key) const {
         if (first_key >= second_key || !root_)
             return 0;
 
@@ -310,7 +310,7 @@ public:
         return size_left_side(right->key_) - size_left_side(left->key_) + border;
     }
 
-    void print() {
+    void print() const {
         if (!root_)
             return;
 
