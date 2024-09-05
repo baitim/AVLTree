@@ -37,6 +37,9 @@
         write <code>cd end_to_end</code> in terminal <br>
         write <code>python3 run_end_to_end.py</code> in terminal <br>
         The test result will be in the "answers/answer_*.out" file
+    
+    - Unit <br>
+        in root dir write <code>./build/tests/unit/unit_avl</code> in terminal
 
 <p align="center"><img src="https://github.com/baitim/AVL_tree/blob/main/images/cat.gif" width="40%"></p>
 

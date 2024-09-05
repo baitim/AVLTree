@@ -19,7 +19,7 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
                              parent_(nullptr), left_(nullptr), right_(nullptr) {}
         avl_node(avl_node* node) : key_(node->key_), height_(node->height_),
                                    Nleft_(node->Nleft_), Nright_(node->Nright_),
-                                   parent_(node->parent_), left_(node->left_), right_(node->right_) {}
+                                   parent_(nullptr), left_(nullptr), right_(nullptr) {}
     };
 
     CompT comp_func;
@@ -238,7 +238,7 @@ private:
             std::cerr << print_lcyan("none" << ",\t");
 
         std::cerr << print_lcyan(node->Nleft_  << ",\t" << node->Nright_ << ",\t" <<
-                                 node->height_ << ")\n");
+                                 node->height_ << ",\t" << node << ")\n");
 
         print_recursive(node->right_);
     }
@@ -257,18 +257,20 @@ public:
 
     avl_t(const avl_t& other) {
         avl_node* curr_other = other.root_;
-        root_ = new avl_node{curr_other};
-        avl_node* curr_this = root_;
+        avl_node* curr_this = new avl_node{curr_other};
 
         while (true) {
+
             if (curr_other->left_ && !curr_this->left_) {
                 curr_other       = curr_other->left_;
                 curr_this->left_ = new avl_node{curr_other};
+                curr_this->left_->parent_ = curr_this;
                 curr_this        = curr_this->left_;
 
             } else if (curr_other->right_ && !curr_this->right_) {
                 curr_other        = curr_other->right_;
                 curr_this->right_ = new avl_node{curr_other};
+                curr_this->right_->parent_ = curr_this;
                 curr_this         = curr_this->right_;
 
             } else {
@@ -280,6 +282,8 @@ public:
                 }
             }
         }
+
+        root_ = curr_this;
     }
 
     avl_t& operator=(const avl_t& other) {
@@ -354,7 +358,7 @@ public:
             return;
 
         std::cerr << print_lblue("\nAVL Tree with root = " << root_->key_ <<
-                                 ":\nkey(<child>, <child>, <parent>, <Nleft>, <Nright>, <height>):\n");
+                                 ":\nkey(<child>, <child>, <parent>, <Nleft>, <Nright>, <height>, <ptr>):\n");
 
         print_recursive(root_);
         std::cerr << '\n';
@@ -362,6 +366,9 @@ public:
 
     ~avl_t()
     {
+        if (!root_)
+            return;
+
         avl_node* current = root_;
         while (true) {
 
