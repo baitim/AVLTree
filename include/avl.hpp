@@ -55,41 +55,37 @@ private:
     }
 
     void balance(avl_node* node) {
-        for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
-            int balance_diff = 0;
-            if (node_iter->left_)
-                balance_diff = node_iter->left_->height_;
-            if (node_iter->right_)
-                balance_diff -= node_iter->right_->height_;
+        int balance_diff = 0;
+        if (node->left_)
+            balance_diff = node->left_->height_;
+        if (node->right_)
+            balance_diff -= node->right_->height_;
 
-            int left_height = 0;
-            int right_height = 0;
-            if (balance_diff > 1) {
-                avl_node* left = node_iter->left_;
-                if (left->left_)
-                    left_height = left->left_->height_;
+        int left_height = 0;
+        int right_height = 0;
+        if (balance_diff > 1) {
+            avl_node* left = node->left_;
+            if (left->left_)
+                left_height = left->left_->height_;
 
-                if (left->right_)
-                    right_height = left->right_->height_;
+            if (left->right_)
+                right_height = left->right_->height_;
 
-                if (left_height < right_height)
-                    rotate_left(node_iter->left_);
-                rotate_right(node_iter);
+            if (left_height < right_height)
+                rotate_left(node->left_);
+            rotate_right(node);
                 
-            } else if (balance_diff < -1) {
-                avl_node* right = node_iter->right_;
-                int left_height = 0;
-                if (right->left_)
-                    left_height = right->left_->height_;
+        } else if (balance_diff < -1) {
+            avl_node* right = node->right_;
+            if (right->left_)
+                left_height = right->left_->height_;
 
-                int right_height = 0;
-                if (right->right_)
-                    right_height = right->right_->height_;
+            if (right->right_)
+                right_height = right->right_->height_;
 
-                if (left_height > right_height)
-                    rotate_right(node_iter->right_);
-                rotate_left(node_iter);
-            }
+            if (left_height > right_height)
+                rotate_right(node->right_);
+            rotate_left(node);
         }
     }
 
@@ -333,7 +329,9 @@ public:
         update_height(destination);
         update_Nchilds(destination);
 
-        balance(current);
+        for (avl_node* node_iter = current; node_iter != nullptr; node_iter = node_iter->parent_)
+            balance(node_iter);
+        
         return current;
     }
 

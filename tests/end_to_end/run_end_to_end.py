@@ -2,7 +2,7 @@ import os
 import glob
 import subprocess
 
-avl_exe = "../../build/tests/end_to_end/avl"
+avl_exe = "../../build/src/avl"
 
 answer_dir = "answers"
 os.system("mkdir -p " + answer_dir)
