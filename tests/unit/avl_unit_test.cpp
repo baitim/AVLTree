@@ -4,10 +4,11 @@
 #include "avl.hpp"
 
 struct AVLFixture : public testing::Test {
+    const int size = 10;
     avl_tree::avl_t<int> avl{INT32_MAX};
 
     void SetUp() override {
-        for (int i = 0; i < 10; i++) 
+        for (int i = 0; i < size; i++)
             avl.insert(i);
     }
 };

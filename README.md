@@ -16,7 +16,7 @@
     write <code>cmake . -B build ; cmake --build build</code> in terminal
 
 4. Run <br>
-    write <code>./build/tests/end_to_end/avl</code> in terminal <br>
+    write <code>./build/src/avl</code> in terminal <br>
 
 ## How to test
 

@@ -34,7 +34,7 @@ int main()
         }
     }
     clock_t time_end = clock();
-    double time =  (static_cast<double>(time_end - time_start)) / CLOCKS_PER_SEC;
+    double time = (static_cast<double>(time_end - time_start)) / CLOCKS_PER_SEC;
     std::cout << time << "\n";
 
     return 0;
