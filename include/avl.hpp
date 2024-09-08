@@ -251,7 +251,7 @@ private:
 public:
     avl_t(KeyT max_key) : root_(nullptr), max_key_(max_key) {}
 
-    avl_t(const avl_t& other) {
+    avl_t(const avl_t<KeyT, CompT>& other) {
         avl_node* curr_other = other.root_;
         avl_node* curr_this = new avl_node{curr_other};
 
@@ -282,7 +282,7 @@ public:
         root_ = curr_this;
     }
 
-    avl_t& operator=(const avl_t& other) {
+    avl_t<KeyT, CompT>& operator=(const avl_t<KeyT, CompT>& other) {
         if (this == &other)
             return *this;
 
