@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
-project(end_to_end)
+project(src)
 
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 
