@@ -27,21 +27,21 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
     KeyT max_key_;
 
 private:
-    int get_node_size(avl_node* node) const {
+    int get_node_size(avl_node* node) const noexcept {
         if (!node)
             return 0;
 
         return node->Nleft_ + node->Nright_ + 1;
     }
 
-    void update_Nchilds(avl_node* node) {
+    void update_Nchilds(avl_node* node) noexcept {
         for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
             node_iter->Nleft_  = get_node_size(node_iter->left_);
             node_iter->Nright_ = get_node_size(node_iter->right_);
         }
     }
 
-    void update_height(avl_node* node) {
+    void update_height(avl_node* node) noexcept {
         for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
             node_iter->height_ = 0;
 
@@ -54,7 +54,7 @@ private:
         }
     }
 
-    void balance(avl_node* node) {
+    void balance(avl_node* node) noexcept {
         int balance_diff = 0;
         if (node->left_)
             balance_diff = node->left_->height_;
@@ -89,7 +89,10 @@ private:
         }
     }
 
-    void rotate_right(avl_node* node) {
+    void rotate_right(avl_node* node) noexcept {
+        if (!node)
+            return;
+
         avl_node* node_left_old = node->left_;
 
         node->left_ = node->left_->right_;
@@ -113,7 +116,10 @@ private:
         update_Nchilds(node);
     }
 
-    void rotate_left(avl_node* node) {
+    void rotate_left(avl_node* node) noexcept {
+        if (!node)
+            return;
+
         avl_node* node_right_old = node->right_;
 
         node->right_ = node->right_->left_;
@@ -137,7 +143,7 @@ private:
         update_Nchilds(node);
     }
 
-    avl_node* get_parent_bigger(avl_node* node, KeyT key) const {
+    avl_node* get_parent_bigger(avl_node* node, KeyT key) const noexcept {
         avl_node* ans_node = node;
         KeyT      ans_key  = max_key_;
         for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
@@ -151,7 +157,10 @@ private:
         return ans_node;
     }
 
-    avl_node* lower_bound(KeyT key) const {
+    avl_node* lower_bound(KeyT key) const noexcept {
+        if (!root_)
+            return nullptr;
+
         avl_node* current = root_;
         while (true) {
             if (key == current->key_) {
@@ -171,7 +180,10 @@ private:
         return nullptr;
     }
 
-    avl_node* upper_bound(KeyT key) const {
+    avl_node* upper_bound(KeyT key) const noexcept {
+        if (!root_)
+            return nullptr;
+
         avl_node* current = root_;
         while (true) {
             if (comp_func(key, current->key_)) {
@@ -189,7 +201,10 @@ private:
         return nullptr;
     }
 
-    int size_left_side(KeyT key) const {
+    int size_left_side(KeyT key) const noexcept {
+        if (!root_)
+            return 0;
+
         int dist = 0;
         avl_node* current = root_;
         while (true) {
@@ -211,7 +226,7 @@ private:
         return dist;
     }
 
-    void print_recursive(const avl_node* const node) const {
+    void print_recursive(const avl_node* const node) const noexcept {
         if (!node) return;
 
         print_recursive(node->left_);
@@ -239,7 +254,7 @@ private:
         print_recursive(node->right_);
     }
 
-    void decrement_parents_size(avl_node* node) {
+    void decrement_parents_size(avl_node* node) noexcept {
         for (avl_node* node_iter = node; node_iter->parent_ != nullptr; node_iter = node_iter->parent_) {
             if (node_iter->parent_->left_ == node_iter)
                 node_iter->parent_->Nleft_--;
@@ -335,7 +350,7 @@ public:
         return current;
     }
 
-    int check_range(KeyT first_key, KeyT second_key) const {
+    int check_range(KeyT first_key, KeyT second_key) const noexcept {
         if (first_key >= second_key || !root_)
             return 0;
 
@@ -351,7 +366,7 @@ public:
         return size_left_side(right->key_) - size_left_side(left->key_) + border;
     }
 
-    void print() const {
+    void print() const noexcept {
         if (!root_)
             return;
 
@@ -362,8 +377,7 @@ public:
         std::cerr << '\n';
     }
 
-    ~avl_t()
-    {
+    ~avl_t() {
         if (!root_)
             return;
 
