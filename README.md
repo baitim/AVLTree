@@ -27,10 +27,15 @@
 
 ## How to compare
 
-* Comparing
+* Preparing
     write <code>cd compare</code> in terminal <br>
-    in root dir write <code>./run_compare.sh</code> in terminal <br>
-    The result of the comparison will be in the "compare.out" file
+    write <code>python3 generate.py</code> in terminal <br>
+
+* Comparing
+    write <code>python3 compare.py</code> in terminal <br>
+    The result of the comparison will be in the "compare.out" and "times.png" file
+
+<p align="center"><img src="https://github.com/baitim/AVL_tree/blob/main/compare/times.png" width="50%"></p>
 
 <p align="center"><img src="https://github.com/baitim/AVL_tree/blob/main/images/cat.gif" width="40%"></p>
 
