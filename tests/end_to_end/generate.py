@@ -1,16 +1,20 @@
 import random
+import os
+
 count_tests = 5
 
+to_curr_dir = os.path.dirname(os.path.realpath(__file__))
+
 for test_num in range(0, count_tests) :
-    file_name = "tests_dat/test_" + f'{test_num+1:03}' + ".in"
+    file_name = to_curr_dir + "/tests_in/test_" + f'{test_num+1:03}' + ".in"
     file = open(file_name, 'w')
 
-    count_inserts = random.randint(30000, 40000)
+    count_inserts = random.randint(4000, 5000)
     min_number    = 1
     max_number    = 1000000
     used_inserts  = 0
 
-    count_ranges  = random.randint(30000, 50000)
+    count_ranges  = random.randint(6000, 7000)
     min_range     = (int)(min_number - min_number * 0.01) - 1
     max_range     = (int)(max_number * 1.01) + 1
     used_ranges   = 0
@@ -18,7 +22,7 @@ for test_num in range(0, count_tests) :
     insert_chance = 0.75
     precision     = 10000
 
-    count_parts = 100
+    count_parts = max(1, (int)(count_ranges / 100))
     sum = count_ranges + count_inserts
     split_sum = sum // count_parts
     print("count = ", sum / 100000)

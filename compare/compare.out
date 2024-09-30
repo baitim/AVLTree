@@ -1,0 +1,6 @@
+file							avl_time	set_time	ratio
+../tests/end_to_end/tests_in/test_001.in		0.0177		0.0322		1.81
+../tests/end_to_end/tests_in/test_002.in		0.0068		0.0307		4.51
+../tests/end_to_end/tests_in/test_003.in		0.0066		0.0313		4.69
+../tests/end_to_end/tests_in/test_004.in		0.0082		0.0328		4.00
+../tests/end_to_end/tests_in/test_005.in		0.0071		0.0366		5.10

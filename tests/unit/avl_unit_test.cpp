@@ -1,6 +1,47 @@
 #include <iostream>
 #include <gtest/gtest.h>
+#include <filesystem>
+#include <fstream>
 #include "avl.hpp"
+
+std::vector<std::string> get_sorted_files(std::filesystem::path path) {
+    std::vector<std::string> files;
+
+    for (const auto& entry : std::filesystem::directory_iterator(path))
+        files.push_back(entry.path().string());
+
+    std::sort(files.begin(), files.end());
+    return files;
+}
+
+TEST(AVL_end_to_end, cmp_with_set) 
+{
+    std::filesystem::path dir = "../../../tests/end_to_end/";
+    std::filesystem::path answers_avl_path = dir / "answers_avl/";
+    std::filesystem::path answers_set_path = dir / "answers_set/";
+
+    std::vector<std::string> answers_avl_str = get_sorted_files(answers_avl_path);
+    std::vector<std::string> answers_set_str = get_sorted_files(answers_set_path);
+    const int count_tests = std::min(answers_avl_str.size(), answers_set_str.size());
+
+    for (int i = 0, count; i < count_tests; ++i) {
+        std::ifstream answer_avl_file(answers_avl_str[i]);
+        std::vector<int> ans_avl;
+        while (answer_avl_file >> count)
+            ans_avl.push_back(count);
+        answer_avl_file.close();
+
+        std::ifstream answer_set_file(answers_set_str[i]);
+        std::vector<int> ans_set;
+        while (answer_set_file >> count)
+            ans_set.push_back(count);
+        answer_set_file.close();
+
+        EXPECT_EQ(ans_avl.size(), ans_set.size());
+        for (int j = 0, end = ans_avl.size(); j < end; ++j)
+            EXPECT_EQ(ans_avl[j], ans_set[j]);
+    }
+}
 
 struct AVLFixture : public testing::Test {
     const int size = 10;

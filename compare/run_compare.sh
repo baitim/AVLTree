@@ -1,7 +1,7 @@
 #!/bin/bash
 
-avl_exe="../../build/tests/compare/cmp_avl"
-set_exe="../../build/tests/compare/cmp_set"
+avl_exe="../build/compare/cmp_avl"
+set_exe="../build/compare/cmp_set"
 answer_file="compare.out"
 
 touch $answer_file
@@ -9,7 +9,7 @@ echo -n > $answer_file
 
 printf "file\t\t\t\t\t\t\tavl_time\tset_time\tratio\n" >> $answer_file
 
-for file in ../tests_dat/test_*.in
+for file in ../tests/end_to_end/tests_in/test_*.in
 do
     run_file="./${file}"
     avl_time=$($avl_exe < $run_file)

@@ -10,8 +10,7 @@ target_include_directories(unit_avl PUBLIC ${INCLUDE_DIR})
 target_link_libraries(unit_avl gtest gtest_main)
 
 set(RUN_TESTS ./unit_avl --gtest_color=yes)
-add_custom_target(
-    unit_avl_target ALL
+add_test(
+    NAME unit_avl_target
     COMMAND ${RUN_TESTS}
-    DEPENDS unit_avl
 )

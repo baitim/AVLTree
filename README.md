@@ -20,26 +20,17 @@
 
 ## How to test
 
-1. Prepare
-    - Go to folder <br>
-        write <code>cd tests</code> in terminal
+* Testing
+    - End to end & Unit<br>
+        in root dir write <code>ctest --test-dir build</code> in terminal <br>
+        maybe you will need these flags for the ctest <code>--rerun-failed --output-on-failure</code>
 
-    - Generate tests <br>
-        write <code>python3 generate.py</code> in terminal
+## How to compare
 
-2. Testing
-    - Compare <br>
-        write <code>cd compare</code> in terminal <br>
-        write <code>./run_compare.sh</code> in terminal <br>
-        The result of the comparison will be in the "compare.out" file
-
-    - End to end <br>
-        write <code>cd end_to_end</code> in terminal <br>
-        write <code>python3 run_end_to_end.py</code> in terminal <br>
-        The test result will be in the "answers/answer_*.out" file
-    
-    - Unit <br>
-        in root dir write <code>./build/tests/unit/unit_avl</code> in terminal
+* Comparing
+    write <code>cd compare</code> in terminal <br>
+    in root dir write <code>./run_compare.sh</code> in terminal <br>
+    The result of the comparison will be in the "compare.out" file
 
 <p align="center"><img src="https://github.com/baitim/AVL_tree/blob/main/images/cat.gif" width="40%"></p>
 
