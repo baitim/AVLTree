@@ -35,7 +35,10 @@
     write <code>python3 compare.py</code> in terminal <br>
     The result of the comparison will be in the "compare.out" and "times.png" file
 
-<p align="center"><img src="https://github.com/baitim/AVL_tree/blob/main/compare/times.png" width="50%"></p>
+<p align="center"> <figure>
+    <img src="https://github.com/baitim/AVL_tree/blob/main/compare/times.png" width="80%">
+    <figcaption>i5-1135G7</figcaption>
+</figure> </p>
 
 <p align="center"><img src="https://github.com/baitim/AVL_tree/blob/main/images/cat.gif" width="40%"></p>
 

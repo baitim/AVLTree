@@ -7,7 +7,7 @@ os.system("mkdir -p " + bench_in_dir)
 
 counts = []
 max_count  = (int)(1e5)
-step_count = (int)(5 * 1e3)
+step_count = (int)(2 * 1e3)
 for i in range(step_count, max_count, step_count):
     counts.append(i)
 
