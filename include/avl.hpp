@@ -268,6 +268,11 @@ public:
 
     avl_t(const avl_t<KeyT, CompT>& other) {
         avl_node* curr_other = other.root_;
+        if (!curr_other) {
+            root_ = nullptr;
+            return;
+        }
+
         avl_node* curr_this = new avl_node{curr_other};
 
         while (true) {
