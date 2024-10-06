@@ -335,12 +335,12 @@ public:
         return *this;
     }
 
-    avl_node* insert(const KeyT& key) {
+    void insert(const KeyT& key) {
         avl_node* new_node = new avl_node{key};
 
         if (!root_) {
             root_ = new_node;
-            return root_;
+            return;
         }
 
         avl_node* current = root_;
@@ -366,7 +366,7 @@ public:
                 }
             } else {
                 delete new_node;
-                return current;
+                return;
             }
         }
 
@@ -375,8 +375,6 @@ public:
 
         for (avl_node* node_iter = current; node_iter != nullptr; node_iter = node_iter->parent_)
             balance(node_iter);
-        
-        return current;
     }
 
     int check_range(KeyT first_key, KeyT second_key) const {
