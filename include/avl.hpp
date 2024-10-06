@@ -167,7 +167,7 @@ private:
             return nullptr;
 
         avl_node* current = root_;
-        while (true) {
+        while (current) {
             if (comp_func(key, current->key_)) {
                 if (current->left_)
                     current = current->left_;
@@ -182,7 +182,7 @@ private:
                 return current;
             }
         }
-        return nullptr;
+        return current;
     }
 
     avl_node* upper_bound(KeyT key) const {
@@ -190,7 +190,7 @@ private:
             return nullptr;
 
         avl_node* current = root_;
-        while (true) {
+        while (current) {
             if (comp_func(key, current->key_)) {
                 if (current->left_)
                     current = current->left_;
@@ -203,7 +203,7 @@ private:
                     return get_parent_bigger(current, key);
             }
         }
-        return nullptr;
+        return current;
     }
 
     int size_left_side(KeyT key) const {
@@ -212,7 +212,7 @@ private:
 
         int dist = 0;
         avl_node* current = root_;
-        while (true) {
+        while (current) {
             if (comp_func(key, current->key_)) {
                 if (current->left_)
                     current = current->left_;
@@ -259,7 +259,7 @@ private:
         if (!node) return;
 
         avl_node* current = node;
-        while (true) {
+        while (current) {
             if (current->left_ && current->left_->node_status_ == node_status_e::NODE_STATUS_NOT_USED) {
                 print_subtree(current->left_);
                 continue;
@@ -274,10 +274,7 @@ private:
                 continue;
             }
 
-            if (current->parent_)
-                current = current->parent_;
-            else
-                break;
+            current = current->parent_;
         }
     }
 
@@ -302,7 +299,7 @@ public:
 
         avl_node* curr_this = new avl_node{curr_other};
 
-        while (true) {
+        while (curr_other) {
 
             if (curr_other->left_ && !curr_this->left_) {
                 curr_other       = curr_other->left_;
@@ -348,7 +345,7 @@ public:
 
         avl_node* current = root_;
         avl_node* destination;
-        while (true) {
+        while (current) {
             if (comp_func(key, current->key_)) {
                 if (current->left_) {
                     current = current->left_;
@@ -416,7 +413,7 @@ public:
             return;
 
         avl_node* current = root_;
-        while (true) {
+        while (current) {
 
             if (current->Nleft_ > 0) {
                 int node_left_size = get_node_size(current->left_);
@@ -439,10 +436,7 @@ public:
                 }
 
             } else {
-                if (current->parent_)
-                    current = current->parent_;
-                else
-                    break;
+                current = current->parent_;
             }
         }
 
