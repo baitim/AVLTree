@@ -6,20 +6,25 @@
 namespace avl_tree {
 
 template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
+
+    enum class node_status_e {
+        NODE_STATUS_NOT_USED,
+        NODE_STATUS_USED,
+    };
+
     struct avl_node final {
         KeyT key_;
-        int height_;
-        int Nleft_;
-        int Nright_;
-        avl_node* parent_;
-        avl_node* left_;
-        avl_node* right_;
+        node_status_e node_status_ = node_status_e::NODE_STATUS_NOT_USED;
+        int height_ = 0;
+        int Nleft_  = 0;
+        int Nright_ = 0;
+        avl_node* parent_ = nullptr;
+        avl_node* left_   = nullptr;
+        avl_node* right_  = nullptr;
 
-        avl_node(KeyT key) : key_(key), height_(0), Nleft_(0), Nright_(0),
-                             parent_(nullptr), left_(nullptr), right_(nullptr) {}
-        avl_node(avl_node* node) : key_(node->key_), height_(node->height_),
-                                   Nleft_(node->Nleft_), Nright_(node->Nright_),
-                                   parent_(nullptr), left_(nullptr), right_(nullptr) {}
+        avl_node(KeyT key) : key_(key) {}
+        avl_node(avl_node* node) : key_(node->key_),     height_(node->height_),
+                                   Nleft_(node->Nleft_), Nright_(node->Nright_){}
     };
 
     CompT comp_func;
@@ -226,10 +231,8 @@ private:
         return dist;
     }
 
-    void print_recursive(const avl_node* const node) const noexcept {
+    void print_node(const avl_node* node) const noexcept {
         if (!node) return;
-
-        print_recursive(node->left_);
 
         std::cerr << print_lcyan(node->key_ << "\t(");
 
@@ -250,8 +253,32 @@ private:
 
         std::cerr << print_lcyan(node->Nleft_  << ",\t" << node->Nright_ << ",\t" <<
                                  node->height_ << ",\t" << node << ")\n");
+    }
 
-        print_recursive(node->right_);
+    void print_subtree(avl_node* node) noexcept {
+        if (!node) return;
+
+        avl_node* current = node;
+        while (true) {
+            if (current->left_ && current->left_->node_status_ == node_status_e::NODE_STATUS_NOT_USED) {
+                print_subtree(current->left_);
+                continue;
+            }
+
+            if (current->node_status_ == node_status_e::NODE_STATUS_NOT_USED)
+                print_node(current);
+            current->node_status_ = node_status_e::NODE_STATUS_USED;
+
+            if (current->right_ && current->right_->node_status_ == node_status_e::NODE_STATUS_NOT_USED) {
+                print_subtree(current->right_);
+                continue;
+            }
+
+            if (current->parent_)
+                current = current->parent_;
+            else
+                break;
+        }
     }
 
     void decrement_parents_size(avl_node* node) noexcept {
@@ -375,10 +402,12 @@ public:
         if (!root_)
             return;
 
-        std::cerr << print_lblue("\nAVL Tree with root = " << root_->key_ <<
+        avl_t<KeyT, CompT> print_tree{*this};
+
+        std::cerr << print_lblue("\nAVL Tree with root = " << print_tree.root_->key_ <<
                                  ":\nkey(<child>, <child>, <parent>, <Nleft>, <Nright>, <height>, <ptr>):\n");
 
-        print_recursive(root_);
+        print_tree.print_subtree(print_tree.root_);
         std::cerr << '\n';
     }
 
