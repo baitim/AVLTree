@@ -54,7 +54,7 @@ private:
         }
     }
 
-    void balance(avl_node* node) noexcept {
+    void balance(avl_node* node) {
         int balance_diff = 0;
         if (node->left_)
             balance_diff = node->left_->height_;
@@ -89,7 +89,7 @@ private:
         }
     }
 
-    void rotate_right(avl_node* node) noexcept {
+    void rotate_right(avl_node* node) {
         if (!node)
             return;
 
@@ -116,7 +116,7 @@ private:
         update_Nchilds(node);
     }
 
-    void rotate_left(avl_node* node) noexcept {
+    void rotate_left(avl_node* node) {
         if (!node)
             return;
 
@@ -143,7 +143,7 @@ private:
         update_Nchilds(node);
     }
 
-    avl_node* get_parent_bigger(avl_node* node, KeyT key) const noexcept {
+    avl_node* get_parent_bigger(avl_node* node, KeyT key) const {
         avl_node* ans_node = node;
         KeyT      ans_key  = max_key_;
         for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
@@ -157,7 +157,7 @@ private:
         return ans_node;
     }
 
-    avl_node* lower_bound(KeyT key) const noexcept {
+    avl_node* lower_bound(KeyT key) const {
         if (!root_)
             return nullptr;
 
@@ -180,7 +180,7 @@ private:
         return nullptr;
     }
 
-    avl_node* upper_bound(KeyT key) const noexcept {
+    avl_node* upper_bound(KeyT key) const {
         if (!root_)
             return nullptr;
 
@@ -201,7 +201,7 @@ private:
         return nullptr;
     }
 
-    int size_left_side(KeyT key) const noexcept {
+    int size_left_side(KeyT key) const {
         if (!root_)
             return 0;
 
@@ -355,7 +355,7 @@ public:
         return current;
     }
 
-    int check_range(KeyT first_key, KeyT second_key) const noexcept {
+    int check_range(KeyT first_key, KeyT second_key) const {
         if (first_key >= second_key || !root_)
             return 0;
 
