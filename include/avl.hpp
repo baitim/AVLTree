@@ -168,18 +168,18 @@ private:
 
         avl_node* current = root_;
         while (true) {
-            if (key == current->key_) {
-                return current;
-            } else if (comp_func(key, current->key_)) {
+            if (comp_func(key, current->key_)) {
                 if (current->left_)
                     current = current->left_;
                 else
                     return get_parent_bigger(current, key);
-            } else {
+            } else if (comp_func(current->key_, key)) {
                 if (current->right_)
                     current = current->right_;
                 else
                     return get_parent_bigger(current, key);
+            } else {
+                return current;
             }
         }
         return nullptr;
@@ -213,19 +213,19 @@ private:
         int dist = 0;
         avl_node* current = root_;
         while (true) {
-            if (key == current->key_) {
-                return dist + current->Nleft_;
-            } else if (comp_func(key, current->key_)) {
+            if (comp_func(key, current->key_)) {
                 if (current->left_)
                     current = current->left_;
                 else
                     break;
-            } else {
+            } else if (comp_func(current->key_, key)) {
                 dist += current->Nleft_ + 1;
                 if (current->right_)
                     current = current->right_;
                 else
                     break;
+            } else {
+                return dist + current->Nleft_;
             }
         }
         return dist;
@@ -349,10 +349,7 @@ public:
         avl_node* current = root_;
         avl_node* destination;
         while (true) {
-            if (key == current->key_) {
-                delete new_node;
-                return current;
-            } else if (comp_func(key, current->key_)) {
+            if (comp_func(key, current->key_)) {
                 if (current->left_) {
                     current = current->left_;
                 } else {
@@ -361,7 +358,7 @@ public:
                     destination = current->left_;
                     break;
                 }
-            } else {
+            } else if (comp_func(current->key_, key)) {
                 if (current->right_) {
                     current = current->right_;
                 } else {
@@ -370,6 +367,9 @@ public:
                     destination = current->right_;
                     break;
                 }
+            } else {
+                delete new_node;
+                return current;
             }
         }
 
