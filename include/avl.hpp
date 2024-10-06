@@ -383,7 +383,7 @@ public:
         return *this;
     }
 
-    void insert(const KeyT& key) {
+    avl_node_it insert(const KeyT& key) {
         avl_node* new_node = new avl_node{key};
 
         if (!root_) {
