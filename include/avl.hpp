@@ -11,7 +11,6 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
         NODE_STATUS_NOT_USED,
         NODE_STATUS_USED,
     };
-
     struct avl_node final {
         KeyT key_;
         node_status_e node_status_ = node_status_e::NODE_STATUS_NOT_USED;
@@ -22,9 +21,54 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
         avl_node* left_   = nullptr;
         avl_node* right_  = nullptr;
 
-        avl_node(KeyT key) : key_(key) {}
+        avl_node(KeyT key) :       key_(key) {}
         avl_node(avl_node* node) : key_(node->key_),     height_(node->height_),
-                                   Nleft_(node->Nleft_), Nright_(node->Nright_){}
+                                   Nleft_(node->Nleft_), Nright_(node->Nright_) {}
+    };
+
+    enum class avl_node_it_type_e {
+        ASCENDING
+    };
+    class avl_node_it final {
+        avl_node* node_          = nullptr;
+        avl_node_it_type_e type_ = avl_node_it_type_e::ASCENDING;
+
+    public:
+        avl_node_it(avl_node* node, avl_node_it_type_e type) : node_(node), type_(type) {}
+
+        avl_node* operator*() {
+            return node_;
+        }
+
+        bool operator==(const avl_node_it& rhs) const {
+            return (rhs.node_ == node_);
+        }
+
+        bool operator!=(const avl_node_it& rhs) const {
+            return (rhs.node_ != node_);
+        }
+
+        avl_node_it& operator++() {
+            if (node_) {
+                switch (type_) {
+                    case avl_node_it_type_e::ASCENDING:
+                        node_ = node_->parent_;
+                        break;
+                }
+            }
+            return *this;
+        }
+
+        avl_node_it begin() const {
+            avl_node* current = node_;
+            while (current->left_)
+                current = current->left_;
+            return avl_node_it{current, type_};
+        }
+
+        avl_node_it end() const {
+            return avl_node_it{nullptr, type_};
+        }
     };
 
     CompT comp_func;
@@ -32,6 +76,10 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_t final {
     KeyT max_key_;
 
 private:
+    avl_node_it ascending_range(avl_node* node) const {
+        return avl_node_it(node, avl_node_it_type_e::ASCENDING);
+    }
+
     int get_node_size(avl_node* node) const noexcept {
         if (!node)
             return 0;
@@ -40,14 +88,14 @@ private:
     }
 
     void update_Nchilds(avl_node* node) noexcept {
-        for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
+        for (auto node_iter : ascending_range(node)) {
             node_iter->Nleft_  = get_node_size(node_iter->left_);
             node_iter->Nright_ = get_node_size(node_iter->right_);
         }
     }
 
     void update_height(avl_node* node) noexcept {
-        for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
+        for (auto node_iter : ascending_range(node)) {
             node_iter->height_ = 0;
 
             if (node_iter->left_)
@@ -151,7 +199,7 @@ private:
     avl_node* get_parent_bigger(avl_node* node, KeyT key) const {
         avl_node* ans_node = node;
         KeyT      ans_key  = max_key_;
-        for (avl_node* node_iter = node; node_iter != nullptr; node_iter = node_iter->parent_) {
+        for (auto node_iter : ascending_range(node)) {
             if (!comp_func(node_iter->key_, key) && node_iter->key_ != key &&
                 comp_func(node_iter->key_, ans_key)) {
 
@@ -373,7 +421,7 @@ public:
         update_height(destination);
         update_Nchilds(destination);
 
-        for (avl_node* node_iter = current; node_iter != nullptr; node_iter = node_iter->parent_)
+        for (auto node_iter : ascending_range(current))
             balance(node_iter);
     }
 
