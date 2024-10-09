@@ -4,7 +4,7 @@
 
 int main()
 {
-    avl_tree::avl_t<int> avl_tree{INT32_MAX};
+    avl_tree::avl_tree_t<int> avl_tree{INT32_MAX};
 
     char command;
     while(std::cin >> command) {
@@ -27,7 +27,7 @@ int main()
                 return 0;
         }
 
-#ifdef DEBUG
+#if 1
         avl_tree.print();
 #endif
     }

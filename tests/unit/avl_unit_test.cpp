@@ -45,7 +45,7 @@ TEST(AVL_end_to_end, cmp_with_set)
 
 struct AVLFixture : public testing::Test {
     const int size = 10;
-    avl_tree::avl_t<int> avl{INT32_MAX};
+    avl_tree::avl_tree_t<int> avl{INT32_MAX};
 
     void SetUp() override {
         for (int i = 0; i < size; i++)
@@ -55,7 +55,7 @@ struct AVLFixture : public testing::Test {
 
 TEST(AVL_tree_main, test_simple)
 {
-    avl_tree::avl_t<int> avl{INT32_MAX};
+    avl_tree::avl_tree_t<int> avl{INT32_MAX};
 
     avl.insert(10);
     avl.insert(20);
@@ -68,10 +68,10 @@ TEST(AVL_tree_main, test_simple)
 
 TEST(AVL_tree_main, test_copy_ctor)
 {   
-    avl_tree::avl_t<int> avl{INT32_MAX};
+    avl_tree::avl_tree_t<int> avl{INT32_MAX};
     
     if (1) {
-        avl_tree::avl_t<int> avl2{INT32_MAX};
+        avl_tree::avl_tree_t<int> avl2{INT32_MAX};
         for (int i = 0; i < 10; i++) 
             avl2.insert(i);
         avl = avl2;
