@@ -177,9 +177,9 @@ private:
         return destination;
     }
 
-    avl_node_it balance(avl_node_it node) {
+    void balance(avl_node_it node) {
         if (!node.is_valid())
-            return node;
+            return;
 
         unique_avl_node* destination = get_unique_ptr(node, node->parent_);
 
@@ -215,7 +215,6 @@ private:
                 node->right_ = std::move(rotate_right(&node->right_));
             *destination = std::move(rotate_left(destination));
         }
-        return node;
     }
 
     unique_avl_node rotate_right(unique_avl_node* node) {
@@ -584,10 +583,8 @@ public:
         update_height (destination);
         update_Nchilds(destination);
 
-        avl_node_it begin = ascending_range(destination).begin();
-        avl_node_it end   = ascending_range(destination).end();
-        for (avl_node_it node_iter = begin; node_iter != end; ++node_iter)
-            node_iter = balance(node_iter).get_node();
+        for (auto node_iter : ascending_range(destination))
+            balance(*node_iter);
 
         return find(destination->key_);
     }
