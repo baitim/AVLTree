@@ -5,7 +5,7 @@
 int main()
 {
     using clock = std::chrono::high_resolution_clock;
-    avl_tree::avl_t<int> avl_tree{INT32_MAX};
+    avl_tree::avl_tree_t<int> avl_tree{INT32_MAX};
     
     auto time_start = clock::now().time_since_epoch().count();
     char command;
