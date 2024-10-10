@@ -6,7 +6,8 @@
 
 namespace avl_tree {
 
-template <typename KeyT, typename CompT = std::less<KeyT>> class avl_tree_t final {
+template <typename KeyT, typename CompT = std::less<KeyT>>
+class avl_tree_t final {
 
     struct avl_node;
     using  unique_avl_node = std::unique_ptr<avl_node>;
@@ -520,7 +521,8 @@ public:
         return *this;
     }
 
-    avl_tree_t(avl_tree_t<KeyT, CompT>&& other) noexcept : comp_func(other.comp_func), root_(other.root_), 
+    avl_tree_t(avl_tree_t<KeyT, CompT>&& other) noexcept : comp_func(other.comp_func),
+                                                           root_(std::move(other.root_)), 
                                                            max_key_(other.max_key_) {
         other.root_ = nullptr;
     }
@@ -636,5 +638,11 @@ public:
         }
     }
 };
+    template <typename KeyT, typename CompT = std::less<KeyT>>
+    void swap(avl_tree_t<KeyT, CompT>& x, avl_tree_t<KeyT, CompT>& y) {
+        avl_tree_t<KeyT, CompT> tmp = std::move(x);
+        x = std::move(y);
+        y = std::move(tmp);
+    }
 
 };

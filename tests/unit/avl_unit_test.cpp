@@ -82,6 +82,43 @@ TEST(AVL_tree_main, test_copy_ctor)
     EXPECT_EQ(avl.check_range(1, 9), 9);
 }
 
+TEST(AVL_tree_raii, test_copy_assign_ctor)
+{
+    avl_tree::avl_tree_t<int> avl{INT32_MAX};
+
+    avl.insert(10);
+    avl.insert(20);
+    avl.insert(30);
+    avl.insert(40);
+
+    if (1) {
+        avl_tree::avl_tree_t<int> avl2{INT32_MAX};
+        avl2.insert(1);
+        avl2.insert(2);
+        avl2.insert(3);
+        avl = avl2;
+    }
+
+    EXPECT_EQ(avl.check_range(0, 4),  3);
+    EXPECT_EQ(avl.check_range(5, 22), 0);
+}
+
+TEST(AVL_tree_raii, test_move_assign_ctor)
+{
+    avl_tree::avl_tree_t<int> avl{INT32_MAX};
+    avl.insert(10);
+    avl.insert(20);
+    avl.insert(30);
+    avl.insert(40);
+    avl_tree::avl_tree_t<int> avl2{INT32_MAX};
+
+    avl_tree::swap(avl, avl2);
+
+    EXPECT_EQ(avl2.check_range(-1, 5),  0);
+    EXPECT_EQ(avl2.check_range( 7, 33), 3);
+    EXPECT_EQ(avl.check_range(-100, 100), 0);
+}
+
 TEST_F(AVLFixture, test_simple_borders)
 {   
     EXPECT_EQ(avl.check_range(0, 3), 4);
