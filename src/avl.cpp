@@ -27,7 +27,7 @@ int main()
                 return 0;
         }
 
-#if 1
+#ifdef DEBUG
         avl_tree.print();
 #endif
     }

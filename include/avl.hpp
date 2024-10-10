@@ -263,7 +263,8 @@ private:
 
         *destination = std::move(node_l_old);
         (*destination)->parent_         = old_node_parent;
-        (*destination)->left_->parent_  = destination->get();
+        if ((*destination)->left_)
+            (*destination)->left_->parent_ = destination->get();
         (*destination)->right_->parent_ = destination->get();
         if ((*destination)->right_->left_)
             (*destination)->right_->left_->parent_ = (*destination)->right_.get();
@@ -293,7 +294,8 @@ private:
         *destination = std::move(node_r_old);
         (*destination)->parent_         = old_node_parent;
         (*destination)->left_->parent_  = destination->get();
-        (*destination)->right_->parent_ = destination->get();
+        if ((*destination)->right_)
+            (*destination)->right_->parent_ = destination->get();
         if ((*destination)->left_->right_)
             (*destination)->left_->right_->parent_ = (*destination)->left_.get();
 
