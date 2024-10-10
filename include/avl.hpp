@@ -200,8 +200,8 @@ private:
                 right_height = left->right_->height_;
 
             if (left_height < right_height)
-                node->left_ = std::move(rotate_left(&node->left_));
-            *destination = std::move(rotate_right(destination));
+                node->left_ = rotate_left(&node->left_);
+            *destination = rotate_right(destination);
 
         } else if (balance_diff < -1) {
             avl_node_it right = *node->right_;
@@ -212,8 +212,8 @@ private:
                 right_height = right->right_->height_;
 
             if (left_height > right_height)
-                node->right_ = std::move(rotate_right(&node->right_));
-            *destination = std::move(rotate_left(destination));
+                node->right_ = rotate_right(&node->right_);
+            *destination = rotate_left(destination);
         }
     }
 
