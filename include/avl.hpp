@@ -47,32 +47,6 @@ template <typename KeyT, typename CompT = std::less<KeyT>> class avl_tree_t fina
             }
         }
 
-        avl_node(const avl_node* node) {
-            if (node) {
-                key_    = node->key_;
-                height_ = node->height_;
-                Nleft_  = node->Nleft_;
-                Nright_ = node->Nright_;
-                parent_ = node->parent_;
-                node_type_ = node->node_type_;
-                if (node->left_)  left_  = std::make_unique<avl_node>(*node->left_);
-                if (node->right_) right_ = std::make_unique<avl_node>(*node->right_);
-            }
-        }
-
-        avl_node(const unique_avl_node& node) {
-            if (node) {
-                key_    = node.get()->key_;
-                height_ = node.get()->height_;
-                Nleft_  = node.get()->Nleft_;
-                Nright_ = node.get()->Nright_;
-                parent_ = node.get()->parent_;
-                node_type_ = node.get()->node_type_;
-                if (node.get()->left_)  left_  = std::make_unique<avl_node>(*node.get()->left_);
-                if (node.get()->right_) right_ = std::make_unique<avl_node>(*node.get()->right_);
-            }
-        }
-
         bool is_valid() const { return ((node_type_ & static_cast<int>(node_type_e::EXIST)) > 0); }
 
         ~avl_node() {
@@ -308,8 +282,9 @@ private:
         avl_node_it ans_node = node;
         KeyT         ans_key = max_key_;
         for (auto node_iter : ascending_range(node)) {
-            if (comp_func(key, node_iter->key_) && node_iter->key_ != key &&
-                comp_func(node_iter->key_, ans_key)) {
+            if ( comp_func(key,             node_iter->key_) &&
+                !comp_func(node_iter->key_, key)             &&
+                 comp_func(node_iter->key_, ans_key)) {
 
                 ans_node = node_iter;
                 ans_key  = node_iter->key_;
@@ -487,7 +462,8 @@ private:
             } else {
                 if (setting == node_setting_type_e::ADD)
                     current->node_->node_type_ |= static_cast<int>(type);
-                if (setting == node_setting_type_e::DELETE)
+                if (setting == node_setting_type_e::DELETE &&
+                    setting & static_cast<int>(type))
                     current->node_->node_type_ -= static_cast<int>(type);
 
                 if (current->parent_)
@@ -513,15 +489,13 @@ public:
 
             if (curr_other->left_ && !curr_this->left_) {
                 curr_other       = curr_other->left_;
-                KeyT new_key = curr_other->key_;
-                curr_this->left_ = std::make_unique<avl_node>((avl_node){new_key});
+                curr_this->left_ = std::make_unique<avl_node>((avl_node){curr_other->key_});
                 curr_this->left_->parent_ = curr_this.get_node();
                 curr_this        = curr_this->left_;
 
             } else if (curr_other->right_ && !curr_this->right_) {
                 curr_other        = curr_other->right_;
-                KeyT new_key = curr_other->key_;
-                curr_this->right_ = std::make_unique<avl_node>((avl_node){new_key});
+                curr_this->right_ = std::make_unique<avl_node>((avl_node){curr_other->key_});
                 curr_this->right_->parent_ = curr_this.get_node();
                 curr_this         = curr_this->right_;
 
