@@ -134,14 +134,14 @@ private:
         return node->Nleft_ + node->Nright_ + 1;
     }
 
-    void update_Nchilds(avl_node_it node) noexcept {
+    void update_Nchilds(const avl_node_it node) noexcept {
         for (auto node_iter : ascending_range(node)) {
             node_iter->Nleft_  = get_node_size(node_iter->left_);
             node_iter->Nright_ = get_node_size(node_iter->right_);
         }
     }
 
-    void update_height(avl_node_it node) noexcept {
+    void update_height(const avl_node_it node) noexcept {
         for (auto node_iter : ascending_range(node)) {
             node_iter->height_ = 0;
             if (node_iter->left_)
@@ -153,7 +153,7 @@ private:
         }
     }
 
-    unique_avl_node* get_unique_ptr(avl_node_it node, avl_node_it parent) {
+    unique_avl_node* get_unique_ptr(const avl_node_it node, avl_node_it parent) {
         unique_avl_node* destination;
         if (node == root_) {
             destination = &root_;
@@ -375,7 +375,7 @@ private:
                                  node->height_ << ",\t" << node.get_node() << ")\n");
     }
 
-    void print_subtree(avl_node_it node) const noexcept {
+    void print_subtree(const avl_node_it node) const {
         if (!node.is_valid())
             return;
 
@@ -411,7 +411,7 @@ private:
         }
     }
 
-    void decrement_parents_size(avl_node_it node) noexcept {
+    void decrement_parents_size(const avl_node_it node) noexcept {
         for (avl_node_it node_iter = node; node_iter->parent_ != nullptr; node_iter = node_iter->parent_) {
             if (node_iter->parent_->left_.get() == node_iter.get_node())
                 node_iter->parent_->Nleft_--;
@@ -506,7 +506,7 @@ public:
         return *this;
     }
 
-    void print() const noexcept {
+    void print() const {
         if (!root_)
             return;
 
