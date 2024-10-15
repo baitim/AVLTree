@@ -584,7 +584,7 @@ public:
                 int node_left_size = get_node_size(current->left_);
                 if (node_left_size == 1) {
                     decrement_parents_size(current->left_);
-                    delete current->left_.get();
+                    current->left_.reset();
                 } else if (node_left_size > 1) {
                     current = current->left_;
                 }
@@ -594,7 +594,7 @@ public:
 
                 if (node_right_size == 1) {
                     decrement_parents_size(current->right_);
-                    delete current->right_.get();
+                    current->right_.reset();
                 } else if (node_right_size > 1) {
                     current = current->right_;
                 }
