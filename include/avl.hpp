@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <cmath>
+#include <iterator>
 #include "ANSI_colors.hpp"
 
 namespace avl_tree {
@@ -49,7 +50,7 @@ class avl_tree_t final {
         ASCENDING
     };
     class avl_node_it final {
-        avl_node* node_          = nullptr;
+        typename std::iterator_traits<avl_node*>::pointer node_;
         avl_node_it_type_e type_ = avl_node_it_type_e::ASCENDING;
 
     public:
@@ -58,11 +59,11 @@ class avl_tree_t final {
 
         avl_node_it(const avl_node_it& node_it,
                     avl_node_it_type_e type = avl_node_it_type_e::ASCENDING) : 
-                    node_(node_it.get_node()), type_(node_it.get_type()) {}
+                    node_(node_it.get_node()), type_(type) {}
         
-        avl_node_it(const avl_node& node,
+        avl_node_it(avl_node& node,
                     avl_node_it_type_e type = avl_node_it_type_e::ASCENDING) :
-                    node_(const_cast<avl_node*>(&node)), type_(type) {}
+                    node_(&node), type_(type) {}
         
         avl_node_it(avl_node* node,
                     avl_node_it_type_e type = avl_node_it_type_e::ASCENDING) : node_(node), type_(type) {}
@@ -80,8 +81,12 @@ class avl_tree_t final {
 
         bool is_valid() const { return (node_ != nullptr); }
 
-        avl_node* operator*()              { return node_; } // return ptr for iterating with ++it;
-        const avl_node* operator*() const  { return node_; }
+        // * and -> types are not equal
+        // because in -> it comfortable to use ptr(avoid get_node())
+        // and in * we need to save ptr of node to use it in deep functions
+        // in * we can't return *node_, because we loose our ptr
+        avl_node_it& operator*()             { return *this; }
+        const avl_node_it& operator*() const { return *this; }
 
         avl_node* operator->()             { return node_; }
         const avl_node* operator->() const { return node_; }
@@ -136,20 +141,21 @@ private:
 
     void update_Nchilds(const avl_node_it node) noexcept {
         for (auto node_iter : ascending_range(node)) {
-            node_iter->Nleft_  = get_node_size(node_iter->left_);
-            node_iter->Nright_ = get_node_size(node_iter->right_);
+            node_iter.get_node()->Nleft_  = get_node_size(node_iter.get_node()->left_);
+            node_iter.get_node()->Nright_ = get_node_size(node_iter.get_node()->right_);
         }
     }
 
     void update_height(const avl_node_it node) noexcept {
         for (auto node_iter : ascending_range(node)) {
-            node_iter->height_ = 0;
-            if (node_iter->left_)
-                node_iter->height_ = node_iter->left_->height_;
-            if (node_iter->right_)
-                node_iter->height_ = std::max(node_iter->height_, node_iter->right_->height_);
+            node_iter.get_node()->height_ = 0;
+            if (node_iter.get_node()->left_)
+                node_iter.get_node()->height_ = node_iter.get_node()->left_->height_;
+            if (node_iter.get_node()->right_)
+                node_iter.get_node()->height_ = std::max(node_iter.get_node()->height_,
+                                                        node_iter.get_node()->right_->height_);
 
-            node_iter->height_++;
+            node_iter.get_node()->height_++;
         }
     }
 
@@ -270,12 +276,12 @@ private:
         avl_node_it ans_node = node;
         KeyT         ans_key = max_key_;
         for (auto node_iter : ascending_range(node)) {
-            if ( comp_func(key,             node_iter->key_) &&
-                !comp_func(node_iter->key_, key)             &&
-                 comp_func(node_iter->key_, ans_key)) {
+            if ( comp_func(key,                        node_iter.get_node()->key_) &&
+                !comp_func(node_iter.get_node()->key_, key)                        &&
+                 comp_func(node_iter.get_node()->key_, ans_key)) {
 
                 ans_node = node_iter;
-                ans_key  = node_iter->key_;
+                ans_key  = node_iter.get_node()->key_;
             }
         }
         return ans_node;
@@ -553,7 +559,7 @@ public:
         update_Nchilds(destination);
 
         for (auto node_iter : ascending_range(destination))
-            balance(*node_iter);
+            balance(node_iter.get_node());
 
         return find(destination->key_);
     }
