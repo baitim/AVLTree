@@ -2,6 +2,8 @@
 
 #include <functional>
 #include <memory>
+#include <vector>
+#include <cmath>
 #include "ANSI_colors.hpp"
 
 namespace avl_tree {
@@ -12,20 +14,12 @@ class avl_tree_t final {
     struct avl_node;
     using  unique_avl_node = std::unique_ptr<avl_node>;
 
-    enum class node_type_e {
-        NOT_USED  = 1 << 0,
-        USED      = 1 << 1,
-        NOT_EXIST = 1 << 2,
-        EXIST     = 1 << 3,
-    };
     enum class node_setting_type_e {
         ADD,
         DELETE,
     };
     struct avl_node final {
         KeyT key_{};
-        int node_type_ = static_cast<int>(node_type_e::NOT_USED) |
-                         static_cast<int>(node_type_e::EXIST);
         int height_ = 0;
         int Nleft_  = 0;
         int Nright_ = 0;
@@ -36,22 +30,16 @@ class avl_tree_t final {
         avl_node(const KeyT& key) : key_(key) {}
 
         avl_node(const avl_node& node) {
-            if (node.is_valid()) {
-                key_    = node.key_;
-                height_ = node.height_;
-                Nleft_  = node.Nleft_;
-                Nright_ = node.Nright_;
-                parent_ = node.parent_;
-                node_type_ = node.node_type_;
-                if (node.left_)  left_  = std::make_unique<avl_node>(*node.left_);
-                if (node.right_) right_ = std::make_unique<avl_node>(*node.right_);
-            }
+            key_    = node.key_;
+            height_ = node.height_;
+            Nleft_  = node.Nleft_;
+            Nright_ = node.Nright_;
+            parent_ = node.parent_;
+            if (node.left_)  left_  = std::make_unique<avl_node>(*node.left_);
+            if (node.right_) right_ = std::make_unique<avl_node>(*node.right_);
         }
 
-        bool is_valid() const { return ((node_type_ & static_cast<int>(node_type_e::EXIST)) > 0); }
-
         ~avl_node() {
-            key_.~KeyT();
             left_.release();
             right_.release();
         }
@@ -92,22 +80,22 @@ class avl_tree_t final {
 
         bool is_valid() const { return (node_ != nullptr); }
 
-        avl_node* operator*()             { return (node_ ? node_ : nullptr); } // return ptr for iterating with ++it;
-        const avl_node* operator*() const { return (node_ ? node_ : nullptr); }
+        avl_node* operator*()              { return node_; } // return ptr for iterating with ++it;
+        const avl_node* operator*() const  { return node_; }
 
-        avl_node* operator->()             { return (node_ ? node_ : nullptr); }
-        const avl_node* operator->() const { return (node_ ? node_ : nullptr); }
+        avl_node* operator->()             { return node_; }
+        const avl_node* operator->() const { return node_; }
 
         bool operator==(const avl_node_it& rhs) const {
             return (rhs.node_ == node_);
         }
 
         bool operator!=(const avl_node_it& rhs) const {
-            return (rhs.node_ != node_);
+            return !(rhs.node_ == node_);
         }
 
         avl_node_it operator++() {
-            if (is_valid() && node_->is_valid()) {
+            if (is_valid()) {
                 switch (type_) {
                     case avl_node_it_type_e::ASCENDING:
                         node_ = node_->parent_;
@@ -219,7 +207,7 @@ private:
     }
 
     unique_avl_node rotate_right(unique_avl_node* node) {
-        if (!(*node)->is_valid())
+        if (!node->get())
             return std::move(*node);
 
         unique_avl_node* destination = get_unique_ptr(*node, (*node)->parent_);
@@ -249,7 +237,7 @@ private:
     }
 
     unique_avl_node rotate_left(unique_avl_node* node) {
-        if (!(*node)->is_valid())
+        if (!node->get())
             return std::move(*node);
 
         unique_avl_node* destination = get_unique_ptr(*node, (*node)->parent_);
@@ -363,7 +351,7 @@ private:
     }
 
     void print_node(const avl_node_it node) const noexcept {
-        if (!node.is_valid() || !node->is_valid())
+        if (!node.is_valid())
             return;
 
         std::cerr << print_lcyan(node->key_ << "\t(");
@@ -387,33 +375,39 @@ private:
                                  node->height_ << ",\t" << node.get_node() << ")\n");
     }
 
-    void print_subtree(avl_node_it node) noexcept {
-        if (!node.is_valid() || !node->is_valid())
+    void print_subtree(avl_node_it node) const noexcept {
+        if (!node.is_valid())
             return;
 
+        int used_size = std::pow(2, std::log2(get_node_size(node)) + 1);
+        std::vector<bool> used(used_size, false);
+
         avl_node_it current = node;
+        int current_index = 1;
         while (current.is_valid()) {
 
             avl_node_it left_it = current->left_;
             if (left_it.is_valid() &&
-                (current->left_->node_type_ & static_cast<int>(node_type_e::USED)) == 0) {
-                print_subtree(current->left_);
+                !used[current_index * 2]) {
+                current = current->left_;
+                current_index = current_index * 2;
                 continue;
             }
 
-            if (current->node_type_ & static_cast<int>(node_type_e::NOT_USED))
+            if (!used[current_index])
                 print_node(current);
-            current->node_type_ &= !static_cast<int>(node_type_e::NOT_USED);
-            current->node_type_ |=  static_cast<int>(node_type_e::USED);
+            used[current_index] = true;
 
             avl_node_it right_it = current->right_;
             if (right_it.is_valid() &&
-                (current->right_->node_type_ & static_cast<int>(node_type_e::USED)) == 0) {
-                print_subtree(current->right_);
+                !used[current_index * 2 + 1]) {
+                current = current->right_;
+                current_index = current_index * 2 + 1;
                 continue;
             }
 
             current = current->parent_;
+            current_index /= 2;
         }
     }
 
@@ -449,31 +443,6 @@ private:
         return *root_;
     }
 
-    void set_type(const node_type_e& type, const node_setting_type_e* setting) noexcept {
-        if (!root_)
-            return;
-
-        avl_node_it current = *root_;
-        while (current.is_valid()) {
-            if (current->left_) {
-                current = current->left_;
-            } else if (current->right_) {
-                current = current->right_;
-            } else {
-                if (setting == node_setting_type_e::ADD)
-                    current->node_->node_type_ |= static_cast<int>(type);
-                if (setting == node_setting_type_e::DELETE &&
-                    setting & static_cast<int>(type))
-                    current->node_->node_type_ -= static_cast<int>(type);
-
-                if (current->parent_)
-                    current = current->parent_;
-                else
-                    break;
-            }
-        }
-    }
-
 public:
     avl_tree_t(const KeyT& max_key) : max_key_(max_key) {}
 
@@ -482,20 +451,20 @@ public:
         if (!curr_other.is_valid())
             return;
 
-        root_ = std::make_unique<avl_node>((avl_node){other.root_->key_});
+        root_ = std::make_unique<avl_node>(other.root_->key_);
         avl_node_it curr_this = root_;
 
         while (curr_other.is_valid()) {
 
             if (curr_other->left_ && !curr_this->left_) {
                 curr_other       = curr_other->left_;
-                curr_this->left_ = std::make_unique<avl_node>((avl_node){curr_other->key_});
+                curr_this->left_ = std::make_unique<avl_node>(curr_other->key_);
                 curr_this->left_->parent_ = curr_this.get_node();
                 curr_this        = curr_this->left_;
 
             } else if (curr_other->right_ && !curr_this->right_) {
                 curr_other        = curr_other->right_;
-                curr_this->right_ = std::make_unique<avl_node>((avl_node){curr_other->key_});
+                curr_this->right_ = std::make_unique<avl_node>(curr_other->key_);
                 curr_this->right_->parent_ = curr_this.get_node();
                 curr_this         = curr_this->right_;
 
@@ -521,9 +490,9 @@ public:
         return *this;
     }
 
-    avl_tree_t(avl_tree_t<KeyT, CompT>&& other) noexcept : comp_func(other.comp_func),
-                                                           root_(std::move(other.root_)), 
-                                                           max_key_(other.max_key_) {
+    avl_tree_t(avl_tree_t<KeyT, CompT>&& other) noexcept : comp_func(std::move(other.comp_func)),
+                                                           root_    (std::move(other.root_)), 
+                                                           max_key_ (std::move(other.max_key_)) {
         other.root_ = nullptr;
     }
     
@@ -541,18 +510,16 @@ public:
         if (!root_)
             return;
 
-        avl_tree_t<KeyT, CompT> print_tree{*this};
-
-        std::cerr << print_lblue("AVL Tree with root = " << print_tree.root_->key_ <<
+        std::cerr << print_lblue("AVL Tree with root = " << root_->key_ <<
                                  ":\nkey(<child>, <child>, <parent>, <Nleft>, <Nright>, <height>, <ptr>):\n");
 
-        print_tree.print_subtree(print_tree.root_);
+        print_subtree(root_);
         std::cerr << '\n';
     }
 
     avl_node_it insert(const KeyT& key) {
         if (!root_) {
-            root_ = std::make_unique<avl_node>((avl_node){key});
+            root_ = std::make_unique<avl_node>(key);
             return root_;
         }
 
@@ -563,7 +530,7 @@ public:
                 if (current->left_) {
                     current = current->left_;
                 } else {
-                    current->left_ = std::make_unique<avl_node>((avl_node){key});
+                    current->left_ = std::make_unique<avl_node>(key);
                     current->left_->parent_ = current.get_node();
                     destination = current->left_;
                     break;
@@ -572,7 +539,7 @@ public:
                 if (current->right_) {
                     current = current->right_;
                 } else {
-                    current->right_ = std::make_unique<avl_node>((avl_node){key});
+                    current->right_ = std::make_unique<avl_node>(key);
                     current->right_->parent_ = current.get_node();
                     destination = current->right_;
                     break;
@@ -638,11 +605,4 @@ public:
         }
     }
 };
-    template <typename KeyT, typename CompT = std::less<KeyT>>
-    void swap(avl_tree_t<KeyT, CompT>& x, avl_tree_t<KeyT, CompT>& y) {
-        avl_tree_t<KeyT, CompT> tmp = std::move(x);
-        x = std::move(y);
-        y = std::move(tmp);
-    }
-
 };

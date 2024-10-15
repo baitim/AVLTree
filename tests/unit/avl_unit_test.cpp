@@ -112,7 +112,7 @@ TEST(AVL_tree_raii, test_move_assign_ctor)
     avl.insert(40);
     avl_tree::avl_tree_t<int> avl2{INT32_MAX};
 
-    avl_tree::swap(avl, avl2);
+    std::swap(avl, avl2);
 
     EXPECT_EQ(avl2.check_range(-1, 5),  0);
     EXPECT_EQ(avl2.check_range( 7, 33), 3);
