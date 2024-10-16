@@ -82,9 +82,9 @@ class avl_tree_t final {
         bool is_valid() const { return (node_ != nullptr); }
 
         // * and -> types are not equal
-        // because in -> it comfortable to use ptr(avoid get_node())
+        // because in -> it comfortable to return ptr(avoid get_node())
         // and in * we need to save ptr of node to use it in deep functions
-        // in * we can't return *node_, because we loose our ptr
+        // in * we can't return *node_, because we will loose our ptr
         avl_node_it& operator*()             { return *this; }
         const avl_node_it& operator*() const { return *this; }
 
@@ -99,7 +99,7 @@ class avl_tree_t final {
             return !(rhs.node_ == node_);
         }
 
-        avl_node_it operator++() {
+        avl_node_it& operator++() {
             if (is_valid()) {
                 switch (type_) {
                     case avl_node_it_type_e::ASCENDING:
@@ -107,8 +107,15 @@ class avl_tree_t final {
                         break;
                 }
             }
-            return avl_node_it{nullptr, type_};
+            return *this;
         }
+    };
+
+    class ascending_range final {
+        avl_node_it node_;
+
+    public:
+        ascending_range(const avl_node_it node) : node_(node, avl_node_it_type_e::ASCENDING) {}
 
         avl_node_it begin() const {
             avl_node_it current = node_;
@@ -119,7 +126,7 @@ class avl_tree_t final {
         }
 
         avl_node_it end() const {
-            return avl_node_it{nullptr, type_};
+            return avl_node_it{nullptr, avl_node_it_type_e::ASCENDING};
         }
     };
 
@@ -128,10 +135,6 @@ class avl_tree_t final {
     KeyT max_key_;
 
 private:
-    avl_node_it ascending_range(const avl_node_it node) const {
-        return avl_node_it(node, avl_node_it_type_e::ASCENDING);
-    }
-
     int get_node_size(const avl_node_it node) const noexcept {
         if (!node.is_valid())
             return 0;
