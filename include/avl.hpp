@@ -17,7 +17,7 @@ class avl_tree_t final {
 
     enum class node_setting_type_e {
         ADD,
-        DELETE,
+        DELETE
     };
     struct avl_node final {
         KeyT key_{};
@@ -143,14 +143,14 @@ private:
     }
 
     void update_Nchilds(const avl_node_it node) noexcept {
-        for (auto node_iter : ascending_range(node)) {
+        for (auto node_iter : ascending_range{node}) {
             node_iter.get_node()->Nleft_  = get_node_size(node_iter.get_node()->left_);
             node_iter.get_node()->Nright_ = get_node_size(node_iter.get_node()->right_);
         }
     }
 
     void update_height(const avl_node_it node) noexcept {
-        for (auto node_iter : ascending_range(node)) {
+        for (auto node_iter : ascending_range{node}) {
             node_iter.get_node()->height_ = 0;
             if (node_iter.get_node()->left_)
                 node_iter.get_node()->height_ = node_iter.get_node()->left_->height_;
@@ -278,7 +278,7 @@ private:
     avl_node_it get_parent_bigger(const avl_node_it node, const KeyT& key) const {
         avl_node_it ans_node = node;
         KeyT         ans_key = max_key_;
-        for (auto node_iter : ascending_range(node)) {
+        for (auto node_iter : ascending_range{node}) {
             if ( comp_func(key,                        node_iter.get_node()->key_) &&
                 !comp_func(node_iter.get_node()->key_, key)                        &&
                  comp_func(node_iter.get_node()->key_, ans_key)) {
@@ -561,7 +561,7 @@ public:
         update_height (destination);
         update_Nchilds(destination);
 
-        for (auto node_iter : ascending_range(destination))
+        for (auto node_iter : ascending_range{destination})
             balance(node_iter.get_node());
 
         return find(destination->key_);
