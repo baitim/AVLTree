@@ -15,10 +15,6 @@ class avl_tree_t final {
     struct avl_node;
     using  unique_avl_node = std::unique_ptr<avl_node>;
 
-    enum class node_setting_type_e {
-        ADD,
-        DELETE
-    };
     struct avl_node final {
         KeyT key_{};
         int height_ = 0;
