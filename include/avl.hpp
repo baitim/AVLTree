@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <iterator>
+#include <exception>
 #include "ANSI_colors.hpp"
 
 namespace avl_tree {
@@ -42,30 +43,19 @@ class avl_tree_t final {
         }
     };
 
-    enum class avl_node_it_type_e {
-        ASCENDING
-    };
     class avl_node_it final {
         typename std::iterator_traits<avl_node*>::pointer node_;
-        avl_node_it_type_e type_ = avl_node_it_type_e::ASCENDING;
 
     public:
-        avl_node*          get_node() const { return node_; }
-        avl_node_it_type_e get_type() const { return type_; }
+        avl_node* get_node() const { return node_; }
 
-        avl_node_it(const avl_node_it& node_it,
-                    avl_node_it_type_e type = avl_node_it_type_e::ASCENDING) : 
-                    node_(node_it.get_node()), type_(type) {}
+        avl_node_it(const avl_node_it& node_it) : node_(node_it.get_node()) {}
         
-        avl_node_it(avl_node& node,
-                    avl_node_it_type_e type = avl_node_it_type_e::ASCENDING) :
-                    node_(&node), type_(type) {}
+        avl_node_it(avl_node& node) : node_(&node) {}
         
-        avl_node_it(avl_node* node,
-                    avl_node_it_type_e type = avl_node_it_type_e::ASCENDING) : node_(node), type_(type) {}
+        avl_node_it(avl_node* node) : node_(node){}
 
-        avl_node_it(const unique_avl_node& node,
-                    avl_node_it_type_e type = avl_node_it_type_e::ASCENDING) : node_(node.get()), type_(type) {}
+        avl_node_it(const unique_avl_node& node) : node_(node.get()) {}
 
         avl_node_it& operator=(const unique_avl_node& node) {
             if (node_ == node.get())
@@ -77,12 +67,15 @@ class avl_tree_t final {
 
         bool is_valid() const { return (node_ != nullptr); }
 
-        // * and -> types are not equal
-        // because in -> it comfortable to return ptr(avoid get_node())
-        // and in * we need to save ptr of node to use it in deep functions
-        // in * we can't return *node_, because we will loose our ptr
-        avl_node_it& operator*()             { return *this; }
-        const avl_node_it& operator*() const { return *this; }
+        avl_node& operator*() {
+            if (node_) return *node_;
+            throw std::invalid_argument("*nullptr");
+        }
+
+        const avl_node& operator*() const {
+            if (node_) return *node_;
+            throw std::invalid_argument("*nullptr");
+        }
 
         avl_node* operator->()             { return node_; }
         const avl_node* operator->() const { return node_; }
@@ -96,13 +89,8 @@ class avl_tree_t final {
         }
 
         avl_node_it& operator++() {
-            if (is_valid()) {
-                switch (type_) {
-                    case avl_node_it_type_e::ASCENDING:
-                        node_ = node_->parent_;
-                        break;
-                }
-            }
+            if (is_valid())
+                node_ = node_->parent_;
             return *this;
         }
     };
@@ -111,7 +99,7 @@ class avl_tree_t final {
         avl_node_it node_;
 
     public:
-        ascending_range(const avl_node_it node) : node_(node, avl_node_it_type_e::ASCENDING) {}
+        ascending_range(const avl_node_it node) : node_(node) {}
 
         avl_node_it begin() const {
             avl_node_it current = node_;
@@ -122,7 +110,7 @@ class avl_tree_t final {
         }
 
         avl_node_it end() const {
-            return avl_node_it{nullptr, avl_node_it_type_e::ASCENDING};
+            return avl_node_it{nullptr};
         }
     };
 
@@ -139,22 +127,21 @@ private:
     }
 
     void update_Nchilds(const avl_node_it node) noexcept {
-        for (auto node_iter : ascending_range{node}) {
-            node_iter.get_node()->Nleft_  = get_node_size(node_iter.get_node()->left_);
-            node_iter.get_node()->Nright_ = get_node_size(node_iter.get_node()->right_);
+        for (auto& node_ : ascending_range{node}) {
+            node_.Nleft_  = get_node_size(node_.left_);
+            node_.Nright_ = get_node_size(node_.right_);
         }
     }
 
     void update_height(const avl_node_it node) noexcept {
-        for (auto node_iter : ascending_range{node}) {
-            node_iter.get_node()->height_ = 0;
-            if (node_iter.get_node()->left_)
-                node_iter.get_node()->height_ = node_iter.get_node()->left_->height_;
-            if (node_iter.get_node()->right_)
-                node_iter.get_node()->height_ = std::max(node_iter.get_node()->height_,
-                                                        node_iter.get_node()->right_->height_);
+        for (auto& node_ : ascending_range{node}) {
+            node_.height_ = 0;
+            if (node_.left_)
+                node_.height_ = node_.left_->height_;
+            if (node_.right_)
+                node_.height_ = std::max(node_.height_, node_.right_->height_);
 
-            node_iter.get_node()->height_++;
+            node_.height_++;
         }
     }
 
@@ -273,14 +260,14 @@ private:
 
     avl_node_it get_parent_bigger(const avl_node_it node, const KeyT& key) const {
         avl_node_it ans_node = node;
-        KeyT         ans_key = max_key_;
-        for (auto node_iter : ascending_range{node}) {
-            if ( comp_func(key,                        node_iter.get_node()->key_) &&
-                !comp_func(node_iter.get_node()->key_, key)                        &&
-                 comp_func(node_iter.get_node()->key_, ans_key)) {
+        KeyT        ans_key  = max_key_;
+        for (auto& node_ : ascending_range{node}) {
+            if ( comp_func(key,        node_.key_) &&
+                !comp_func(node_.key_, key)        &&
+                 comp_func(node_.key_, ans_key)) {
 
-                ans_node = node_iter;
-                ans_key  = node_iter.get_node()->key_;
+                ans_node = node_;
+                ans_key  = node_.key_;
             }
         }
         return ans_node;
@@ -377,7 +364,7 @@ private:
             std::cerr << print_lcyan("none" << ",\t");
 
         std::cerr << print_lcyan(node->Nleft_  << ",\t" << node->Nright_ << ",\t" <<
-                                 node->height_ << ",\t" << node.get_node() << ")\n");
+                                 node->height_ << ",\t" << node.operator->() << ")\n");
     }
 
     void print_subtree(const avl_node_it node) const {
@@ -418,10 +405,11 @@ private:
 
     void decrement_parents_size(const avl_node_it node) noexcept {
         for (avl_node_it node_iter = node; node_iter->parent_ != nullptr; node_iter = node_iter->parent_) {
-            if (node_iter->parent_->left_.get() == node_iter.get_node())
-                node_iter->parent_->Nleft_--;
+            auto& node_ = *node_iter;
+            if (node_.parent_->left_.get() == &node_)
+                node_.parent_->Nleft_--;
             else
-                node_iter->parent_->Nright_--;
+                node_.parent_->Nright_--;
         }
     }
 
@@ -557,8 +545,8 @@ public:
         update_height (destination);
         update_Nchilds(destination);
 
-        for (auto node_iter : ascending_range{destination})
-            balance(node_iter.get_node());
+        for (auto& node_ : ascending_range{destination})
+            balance(node_);
 
         return find(destination->key_);
     }
