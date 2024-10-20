@@ -29,14 +29,20 @@ class avl_tree_t final {
     };
 
     class avl_node_it final {
-        typename std::iterator_traits<avl_node*>::pointer node_;
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = avl_node;
+        using pointer           = value_type*;
+        using reference         = value_type&;
+        using difference_type   = std::ptrdiff_t;
+
+        pointer node_;
 
     public:
-        avl_node* get_node() const { return node_; }
+        pointer get_node() const { return node_; }
 
         avl_node_it(const avl_node_it& node_it)  : node_(node_it.get_node()) {}
-        avl_node_it(avl_node& node)              : node_(&node)              {}
-        avl_node_it(avl_node* node)              : node_(node)               {}
+        avl_node_it(reference node)              : node_(&node)              {}
+        avl_node_it(pointer   node)              : node_(node)               {}
         avl_node_it(const unique_avl_node& node) : node_(node.get())         {}
 
         avl_node_it& operator=(const unique_avl_node& node) {
@@ -49,18 +55,18 @@ class avl_tree_t final {
 
         bool is_valid() const { return (node_ != nullptr); }
 
-        avl_node& operator*() {
+        reference operator*() {
             if (node_) return *node_;
             throw std::invalid_argument("*nullptr");
         }
 
-        const avl_node& operator*() const {
+        const reference operator*() const {
             if (node_) return *node_;
             throw std::invalid_argument("*nullptr");
         }
 
-        avl_node* operator->()             { return node_; }
-        const avl_node* operator->() const { return node_; }
+        pointer operator->()             { return node_; }
+        const pointer operator->() const { return node_; }
 
         bool operator==(const avl_node_it& rhs) const {
             return (rhs.node_ == node_);
