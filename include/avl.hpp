@@ -350,7 +350,7 @@ private:
             std::cerr << print_lcyan("none" << ",\t");
 
         std::cerr << print_lcyan(node->Nleft_  << ",\t" << node->Nright_ << ",\t" <<
-                                 node->height_ << ",\t" << node.operator->() << ")\n");
+                                 node->height_ << ",\t" << node.get_node() << ")\n");
     }
 
     void print_subtree(const avl_node_it node) const {
