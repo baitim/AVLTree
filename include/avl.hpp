@@ -53,7 +53,7 @@ class avl_tree_t final {
             return *this;
         }
 
-        bool is_valid() const { return (node_ != nullptr); }
+        bool is_valid() const noexcept { return (node_ != nullptr); }
 
         reference operator*() {
             if (node_) return *node_;
@@ -65,18 +65,18 @@ class avl_tree_t final {
             throw std::invalid_argument("*nullptr");
         }
 
-        pointer operator->()             { return node_; }
-        const pointer operator->() const { return node_; }
+        pointer operator->()             noexcept { return node_; }
+        const pointer operator->() const noexcept { return node_; }
 
-        bool operator==(const avl_node_it& rhs) const {
+        bool operator==(const avl_node_it& rhs) const noexcept {
             return (rhs.node_ == node_);
         }
 
-        bool operator!=(const avl_node_it& rhs) const {
+        bool operator!=(const avl_node_it& rhs) const noexcept {
             return !(rhs.node_ == node_);
         }
 
-        avl_node_it& operator++() {
+        avl_node_it& operator++() noexcept {
             if (is_valid())
                 node_ = node_->parent_;
             return *this;
@@ -114,14 +114,14 @@ private:
         return node->Nleft_ + node->Nright_ + 1;
     }
 
-    void update_Nchilds(const avl_node_it node) noexcept {
+    void update_Nchilds(const avl_node_it node) {
         for (auto& node_ : ascending_range{node}) {
             node_.Nleft_  = get_node_size(node_.left_);
             node_.Nright_ = get_node_size(node_.right_);
         }
     }
 
-    void update_height(const avl_node_it node) noexcept {
+    void update_height(const avl_node_it node) {
         for (auto& node_ : ascending_range{node}) {
             node_.height_ = 0;
             if (node_.left_)
@@ -389,7 +389,7 @@ private:
         }
     }
 
-    void decrement_parents_size(const avl_node_it node) noexcept {
+    void decrement_parents_size(const avl_node_it node) {
         for (avl_node_it node_iter = node; node_iter->parent_ != nullptr; node_iter = node_iter->parent_) {
             auto& node_ = *node_iter;
             if (node_.parent_->left_.get() == &node_)
