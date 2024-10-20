@@ -35,11 +35,12 @@ class avl_tree_t final {
         using reference         = value_type&;
         using difference_type   = std::ptrdiff_t;
 
-        pointer node_;
+        pointer node_ = nullptr;
 
     public:
         pointer get_node() const { return node_; }
 
+        avl_node_it() {}
         avl_node_it(const avl_node_it& node_it)  : node_(node_it.get_node()) {}
         avl_node_it(reference node)              : node_(&node)              {}
         avl_node_it(pointer   node)              : node_(node)               {}
