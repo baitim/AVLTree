@@ -49,13 +49,10 @@ class avl_tree_t final {
     public:
         avl_node* get_node() const { return node_; }
 
-        avl_node_it(const avl_node_it& node_it) : node_(node_it.get_node()) {}
-        
-        avl_node_it(avl_node& node) : node_(&node) {}
-        
-        avl_node_it(avl_node* node) : node_(node){}
-
-        avl_node_it(const unique_avl_node& node) : node_(node.get()) {}
+        avl_node_it(const avl_node_it& node_it)  : node_(node_it.get_node()) {}
+        avl_node_it(avl_node& node)              : node_(&node)              {}
+        avl_node_it(avl_node* node)              : node_(node)               {}
+        avl_node_it(const unique_avl_node& node) : node_(node.get())         {}
 
         avl_node_it& operator=(const unique_avl_node& node) {
             if (node_ == node.get())
@@ -145,24 +142,22 @@ private:
         }
     }
 
-    unique_avl_node* get_unique_ptr(const avl_node_it node, avl_node_it parent) {
-        unique_avl_node* destination;
+    unique_avl_node& get_unique_ptr(const avl_node_it node, avl_node_it parent) {
         if (node == root_) {
-            destination = &root_;
+            return root_;
         } else {
             if (comp_func(node->key_, parent->key_))
-                destination = &parent->left_;
+                return parent->left_;
             else
-                destination = &parent->right_;
+                return parent->right_;
         }
-        return destination;
     }
 
     void balance(avl_node_it node) {
         if (!node.is_valid())
             return;
 
-        unique_avl_node* destination = get_unique_ptr(node, node->parent_);
+        unique_avl_node& destination = get_unique_ptr(node, node->parent_);
 
         int balance_diff = 0;
         if (node->left_)
@@ -181,8 +176,8 @@ private:
                 right_height = left->right_->height_;
 
             if (left_height < right_height)
-                node->left_ = rotate_left(&node->left_);
-            *destination = rotate_right(destination);
+                node->left_ = rotate_left(std::move(node->left_));
+            destination = rotate_right(std::move(destination));
 
         } else if (balance_diff < -1) {
             avl_node_it right = *node->right_;
@@ -193,69 +188,69 @@ private:
                 right_height = right->right_->height_;
 
             if (left_height > right_height)
-                node->right_ = rotate_right(&node->right_);
-            *destination = rotate_left(destination);
+                node->right_ = rotate_right(std::move(node->right_));
+            destination = rotate_left(std::move(destination));
         }
+        update_height (destination);
+        update_Nchilds(destination);
     }
 
-    unique_avl_node rotate_right(unique_avl_node* node) {
-        if (!node->get())
-            return std::move(*node);
+    unique_avl_node rotate_right(unique_avl_node node) {
+        if (!node.get())
+            return std::move(node);
 
-        unique_avl_node* destination = get_unique_ptr(*node, (*node)->parent_);
-        avl_node* old_node_parent = (*node)->parent_;
+        avl_node* old_node_parent = node->parent_;
 
     //-------------------------------------------------------------------------
         unique_avl_node node_lr_old = nullptr;
-        if ((*node)->left_->right_)
-            node_lr_old = std::move((*node)->left_->right_);
-        unique_avl_node node_l_old = std::move((*node)->left_);
+        if (node->left_->right_)
+            node_lr_old = std::move(node->left_->right_);
+        unique_avl_node node_l_old = std::move(node->left_);
 
-        node_l_old->right_ = std::move(*node);
+        node_l_old->right_ = std::move(node);
         node_l_old->right_->left_ = std::move(node_lr_old);
     //-------------------------------------------------------------------------
 
-        *destination = std::move(node_l_old);
-        (*destination)->parent_         = old_node_parent;
-        if ((*destination)->left_)
-            (*destination)->left_->parent_ = destination->get();
-        (*destination)->right_->parent_ = destination->get();
-        if ((*destination)->right_->left_)
-            (*destination)->right_->left_->parent_ = (*destination)->right_.get();
+        unique_avl_node new_node = std::move(node_l_old);
+        new_node->parent_ = old_node_parent;
+        new_node->right_->parent_ = new_node.get();
+        if (new_node->left_)
+            new_node->left_->parent_ = new_node.get();
+        if (new_node->right_->left_)
+            new_node->right_->left_->parent_ = new_node->right_.get();
 
-        update_height ((*destination)->right_);
-        update_Nchilds((*destination)->right_);
-        return std::move(*destination);
+        update_height (new_node->right_);
+        update_Nchilds(new_node->right_);
+        return std::move(new_node);
     }
 
-    unique_avl_node rotate_left(unique_avl_node* node) {
-        if (!node->get())
-            return std::move(*node);
+    unique_avl_node rotate_left(unique_avl_node node) {
+        if (!node.get())
+            return std::move(node);
 
-        unique_avl_node* destination = get_unique_ptr(*node, (*node)->parent_);
-        avl_node* old_node_parent = (*node)->parent_;
+        avl_node* old_node_parent = node->parent_;
 
     //-------------------------------------------------------------------------
         unique_avl_node node_rl_old = nullptr;
-        if ((*node)->right_->left_)
-            node_rl_old = std::move((*node)->right_->left_);
-        unique_avl_node node_r_old = std::move((*node)->right_);
+        if (node->right_->left_)
+            node_rl_old = std::move(node->right_->left_);
+        unique_avl_node node_r_old = std::move(node->right_);
 
-        node_r_old->left_ = std::move(*node);
+        node_r_old->left_ = std::move(node);
         node_r_old->left_->right_ = std::move(node_rl_old);
     //-------------------------------------------------------------------------
 
-        *destination = std::move(node_r_old);
-        (*destination)->parent_         = old_node_parent;
-        (*destination)->left_->parent_  = destination->get();
-        if ((*destination)->right_)
-            (*destination)->right_->parent_ = destination->get();
-        if ((*destination)->left_->right_)
-            (*destination)->left_->right_->parent_ = (*destination)->left_.get();
+        unique_avl_node new_node = std::move(node_r_old);
+        new_node->parent_ = old_node_parent;
+        new_node->left_->parent_ = new_node.get();
+        if (new_node->right_)
+            new_node->right_->parent_ = new_node.get();
+        if (new_node->left_->right_)
+            new_node->left_->right_->parent_ = new_node->left_.get();
 
-        update_height ((*destination)->left_);
-        update_Nchilds((*destination)->left_);
-        return std::move(*destination);
+        update_height (new_node->left_);
+        update_Nchilds(new_node->left_);
+        return std::move(new_node);
     }
 
     avl_node_it get_parent_bigger(const avl_node_it node, const KeyT& key) const {
@@ -577,6 +572,7 @@ public:
                 int node_left_size = get_node_size(current->left_);
                 if (node_left_size == 1) {
                     decrement_parents_size(current->left_);
+                    // std::cerr << "delete " << current->left_->key_;
                     current->left_.reset();
                 } else if (node_left_size > 1) {
                     current = current->left_;
@@ -587,6 +583,7 @@ public:
 
                 if (node_right_size == 1) {
                     decrement_parents_size(current->right_);
+                    // std::cerr << "delete " << current->right_->key_;
                     current->right_.reset();
                 } else if (node_right_size > 1) {
                     current = current->right_;
