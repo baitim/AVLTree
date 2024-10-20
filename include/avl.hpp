@@ -26,21 +26,6 @@ class avl_tree_t final {
         unique_avl_node right_;
 
         avl_node(const KeyT& key) : key_(key) {}
-
-        avl_node(const avl_node& node) {
-            key_    = node.key_;
-            height_ = node.height_;
-            Nleft_  = node.Nleft_;
-            Nright_ = node.Nright_;
-            parent_ = node.parent_;
-            if (node.left_)  left_  = std::make_unique<avl_node>(*node.left_);
-            if (node.right_) right_ = std::make_unique<avl_node>(*node.right_);
-        }
-
-        ~avl_node() {
-            left_.release();
-            right_.release();
-        }
     };
 
     class avl_node_it final {
@@ -572,7 +557,6 @@ public:
                 int node_left_size = get_node_size(current->left_);
                 if (node_left_size == 1) {
                     decrement_parents_size(current->left_);
-                    // std::cerr << "delete " << current->left_->key_;
                     current->left_.reset();
                 } else if (node_left_size > 1) {
                     current = current->left_;
@@ -583,7 +567,6 @@ public:
 
                 if (node_right_size == 1) {
                     decrement_parents_size(current->right_);
-                    // std::cerr << "delete " << current->right_->key_;
                     current->right_.reset();
                 } else if (node_right_size > 1) {
                     current = current->right_;
