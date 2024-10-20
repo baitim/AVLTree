@@ -38,13 +38,11 @@ class avl_tree_t final {
         pointer node_ = nullptr;
 
     public:
-        pointer get_node() const { return node_; }
-
         avl_node_it() {}
-        avl_node_it(const avl_node_it& node_it)  : node_(node_it.get_node()) {}
-        avl_node_it(reference node)              : node_(&node)              {}
-        avl_node_it(pointer   node)              : node_(node)               {}
-        avl_node_it(const unique_avl_node& node) : node_(node.get())         {}
+        avl_node_it(const avl_node_it& node_it)  : node_(std::addressof(*node_it)) {}
+        avl_node_it(reference node)              : node_(&node)      {}
+        avl_node_it(pointer   node)              : node_(node)       {}
+        avl_node_it(const unique_avl_node& node) : node_(node.get()) {}
 
         avl_node_it& operator=(const unique_avl_node& node) {
             if (node_ == node.get())
@@ -351,7 +349,7 @@ private:
             std::cerr << print_lcyan("none" << ",\t");
 
         std::cerr << print_lcyan(node->Nleft_  << ",\t" << node->Nright_ << ",\t" <<
-                                 node->height_ << ",\t" << node.get_node() << ")\n");
+                                 node->height_ << ",\t" << std::addressof(*node) << ")\n");
     }
 
     void print_subtree(const avl_node_it node) const {
@@ -439,13 +437,13 @@ public:
             if (curr_other->left_ && !curr_this->left_) {
                 curr_other       = curr_other->left_;
                 curr_this->left_ = std::make_unique<avl_node>(curr_other->key_);
-                curr_this->left_->parent_ = curr_this.get_node();
+                curr_this->left_->parent_ = std::addressof(*curr_this);
                 curr_this        = curr_this->left_;
 
             } else if (curr_other->right_ && !curr_this->right_) {
                 curr_other        = curr_other->right_;
                 curr_this->right_ = std::make_unique<avl_node>(curr_other->key_);
-                curr_this->right_->parent_ = curr_this.get_node();
+                curr_this->right_->parent_ = std::addressof(*curr_this);
                 curr_this         = curr_this->right_;
 
             } else {
@@ -511,7 +509,7 @@ public:
                     current = current->left_;
                 } else {
                     current->left_ = std::make_unique<avl_node>(key);
-                    current->left_->parent_ = current.get_node();
+                    current->left_->parent_ = std::addressof(*current);
                     destination = current->left_;
                     break;
                 }
@@ -520,7 +518,7 @@ public:
                     current = current->right_;
                 } else {
                     current->right_ = std::make_unique<avl_node>(key);
-                    current->right_->parent_ = current.get_node();
+                    current->right_->parent_ = std::addressof(*current);
                     destination = current->right_;
                     break;
                 }
