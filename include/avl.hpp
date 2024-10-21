@@ -17,7 +17,7 @@ class avl_tree_t final {
     using  unique_avl_node = std::unique_ptr<avl_node>;
 
     struct avl_node final {
-        KeyT key_{};
+        KeyT key_;
         int height_ = 0;
         int Nleft_  = 0;
         int Nright_ = 0;
@@ -82,6 +82,56 @@ class avl_tree_t final {
         }
     };
 
+    class const_avl_node_it final {
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = KeyT;
+        using pointer           = value_type*;
+        using reference         = value_type&;
+        using difference_type   = std::ptrdiff_t;
+
+        avl_node* node_;
+
+        bool is_valid() const noexcept { return (node_ != nullptr); }
+
+    public:
+        const_avl_node_it(const avl_node_it& node_it)  : node_(std::addressof(*node_it)) {}
+        const_avl_node_it(const unique_avl_node& node) : node_(node.get()) {}
+
+        reference operator*() {
+            if (node_) return node_->key_;
+            throw std::invalid_argument("nullptr->");
+        }
+
+        const reference operator*() const {
+            if (node_) return node_->key_;
+            throw std::invalid_argument("nullptr->");
+        }
+
+        pointer operator->() {
+            if (node_) return std::addressof(node_->key_);
+            throw std::invalid_argument("nullptr->");
+        }
+
+        const pointer operator->() const {
+            if (node_) return std::addressof(node_->key_);
+            throw std::invalid_argument("nullptr->");
+        }
+
+        bool operator==(const avl_node_it& rhs) const noexcept {
+            return (rhs.node_ == node_);
+        }
+
+        bool operator!=(const avl_node_it& rhs) const noexcept {
+            return !(rhs.node_ == node_);
+        }
+
+        const_avl_node_it& operator++() noexcept {
+            if (is_valid())
+                node_ = node_->parent_;
+            return *this;
+        }
+    };
+
     class ascending_range final {
         avl_node_it node_;
 
@@ -89,11 +139,7 @@ class avl_tree_t final {
         ascending_range(const avl_node_it node) : node_(node) {}
 
         avl_node_it begin() const {
-            avl_node_it current = node_;
-            if (current.is_valid())
-                while (current->left_)
-                    current = current->left_;
-            return current;
+            return node_;
         }
 
         avl_node_it end() const {
@@ -497,7 +543,7 @@ public:
         std::cerr << '\n';
     }
 
-    avl_node_it insert(const KeyT& key) {
+    const_avl_node_it insert(const KeyT& key) {
         if (!root_) {
             root_ = std::make_unique<avl_node>(key);
             return root_;
