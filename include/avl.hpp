@@ -91,8 +91,6 @@ class avl_tree_t final {
 
         avl_node* node_;
 
-        bool is_valid() const noexcept { return (node_ != nullptr); }
-
     public:
         const_avl_node_it(const avl_node_it& node_it)  : node_(std::addressof(*node_it)) {}
         const_avl_node_it(const unique_avl_node& node) : node_(node.get()) {}
@@ -126,7 +124,7 @@ class avl_tree_t final {
         }
 
         const_avl_node_it& operator++() noexcept {
-            if (is_valid())
+            if (node_)
                 node_ = node_->parent_;
             return *this;
         }
