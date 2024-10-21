@@ -389,8 +389,10 @@ private:
     }
 
     void decrement_parents_size(const avl_node_it node) {
-        for (avl_node_it node_iter = node; node_iter->parent_ != nullptr; node_iter = node_iter->parent_) {
-            auto& node_ = *node_iter;
+        for (auto& node_ : ascending_range{node}) {
+            if (!node_.parent_)
+                break;
+
             if (node_.parent_->left_.get() == &node_)
                 node_.parent_->Nleft_--;
             else
