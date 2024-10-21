@@ -187,7 +187,7 @@ private:
 
     unique_avl_node rotate_right(unique_avl_node node) {
         if (!node.get())
-            return std::move(node);
+            return node;
 
         avl_node* old_node_parent = node->parent_;
 
@@ -211,12 +211,12 @@ private:
 
         update_height (new_node->right_);
         update_Nchilds(new_node->right_);
-        return std::move(new_node);
+        return new_node;
     }
 
     unique_avl_node rotate_left(unique_avl_node node) {
         if (!node.get())
-            return std::move(node);
+            return node;
 
         avl_node* old_node_parent = node->parent_;
 
@@ -240,7 +240,7 @@ private:
 
         update_height (new_node->left_);
         update_Nchilds(new_node->left_);
-        return std::move(new_node);
+        return new_node;
     }
 
     avl_node_it get_parent_bigger(const avl_node_it node, const KeyT& key) const {
