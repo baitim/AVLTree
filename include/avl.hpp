@@ -133,7 +133,7 @@ private:
     }
 
     unique_avl_node& get_unique_ptr(const avl_node_it node, avl_node_it parent) {
-        if (node == root_) {
+        if (std::addressof(*node) == root_.get()) {
             return root_;
         } else {
             if (comp_func(node->key_, parent->key_))
