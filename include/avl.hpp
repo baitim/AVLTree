@@ -289,7 +289,7 @@ private:
         return new_node;
     }
 
-    avl_node_it get_parent_bigger(const avl_node_it node, const KeyT& key) const {
+    avl_node_it get_parent_min_bigger(const avl_node_it node, const KeyT& key) const {
         avl_node_it ans_node = node;
         KeyT        ans_key  = max_key_;
         for (auto& node_ : ascending_range{node}) {
@@ -314,12 +314,12 @@ private:
                 if (current->left_)
                     current = current->left_;
                 else
-                    return get_parent_bigger(current, key);
+                    return get_parent_min_bigger(current, key);
             } else if (comp_func(current->key_, key)) {
                 if (current->right_)
                     current = current->right_;
                 else
-                    return get_parent_bigger(current, key);
+                    return get_parent_min_bigger(current, key);
             } else {
                 return current;
             }
@@ -337,12 +337,12 @@ private:
                 if (current->left_)
                     current = current->left_;
                 else
-                    return get_parent_bigger(current, key);
+                    return get_parent_min_bigger(current, key);
             } else {
                 if (current->right_)
                     current = current->right_;
                 else
-                    return get_parent_bigger(current, key);
+                    return get_parent_min_bigger(current, key);
             }
         }
         return current;
