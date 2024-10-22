@@ -291,9 +291,8 @@ private:
         avl_node_it ans_node = node;
         KeyT        ans_key  = max_key_;
         for (auto& node_ : ascending_range{node}) {
-            if ( comp_func(key,        node_.key_) &&
-                !comp_func(node_.key_, key)        &&
-                 comp_func(node_.key_, ans_key)) {
+            if (comp_func(key,        node_.key_) &&
+                comp_func(node_.key_, ans_key)) {
 
                 ans_node = node_;
                 ans_key  = node_.key_;
