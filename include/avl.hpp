@@ -360,34 +360,35 @@ private:
         return dist;
     }
 
-    void print_node(const avl_node_it node) const noexcept {
+    std::ostream& print_node(std::ostream& os, const avl_node_it node) const noexcept {
         if (!node.is_valid())
-            return;
+            return os;
 
-        std::cerr << print_lcyan(node->key_ << "\t(");
+        os << print_lcyan(node->key_ << "\t(");
 
         if (node->left_)
-            std::cerr << print_lcyan(node->left_->key_ << ",\t");
+            os << print_lcyan(node->left_->key_ << ",\t");
         else
-            std::cerr << print_lcyan("none" << ",\t");
+            os << print_lcyan("none" << ",\t");
 
         if (node->right_)
-            std::cerr << print_lcyan(node->right_->key_ << ",\t");
+            os << print_lcyan(node->right_->key_ << ",\t");
         else
-            std::cerr << print_lcyan("none" << ",\t");
+            os << print_lcyan("none" << ",\t");
 
         if (node->parent_)
-            std::cerr << print_lcyan(node->parent_->key_ << ",\t");
+            os << print_lcyan(node->parent_->key_ << ",\t");
         else
-            std::cerr << print_lcyan("none" << ",\t");
+            os << print_lcyan("none" << ",\t");
 
-        std::cerr << print_lcyan(node->Nleft_  << ",\t" << node->Nright_ << ",\t" <<
-                                 node->height_ << ",\t" << std::addressof(*node) << ")\n");
+        os << print_lcyan(node->Nleft_  << ",\t" << node->Nright_ << ",\t" <<
+                          node->height_ << ",\t" << std::addressof(*node) << ")\n");
+        return os;
     }
 
-    void print_subtree(const avl_node_it node) const {
+    std::ostream& print_subtree(std::ostream& os, const avl_node_it node) const {
         if (!node.is_valid())
-            return;
+            return os;
 
         int used_size = std::pow(2, std::log2(get_node_size(node)) + 1);
         std::vector<bool> used(used_size, false);
@@ -405,7 +406,7 @@ private:
             }
 
             if (!used[current_index])
-                print_node(current);
+                print_node(os, current);
             used[current_index] = true;
 
             avl_node_it right_it = current->right_;
@@ -419,6 +420,7 @@ private:
             current = current->parent_;
             current_index /= 2;
         }
+        return os;
     }
 
     void decrement_parents_size(const avl_node_it node) {
@@ -519,15 +521,15 @@ public:
         return *this;
     }
 
-    void print() const {
+    std::ostream& print(std::ostream& os) const {
         if (!root_)
-            return;
+            return os;
 
-        std::cerr << print_lblue("AVL Tree with root = " << root_->key_ <<
-                                 ":\nkey(<child>, <child>, <parent>, <Nleft>, <Nright>, <height>, <ptr>):\n");
+        os << print_lblue("AVL Tree with root = " << root_->key_ <<
+                          ":\nkey(<child>, <child>, <parent>, <Nleft>, <Nright>, <height>, <ptr>):\n");
 
-        print_subtree(root_);
-        std::cerr << '\n';
+        print_subtree(os, root_);
+        return os;
     }
 
     const_avl_node_it insert(const KeyT& key) {
@@ -618,4 +620,8 @@ public:
         }
     }
 };
+    template <typename KeyT, typename CompT>
+    std::ostream& operator<<(std::ostream& os, const avl_tree_t<KeyT, CompT>& avl_tree) {
+        return avl_tree.print(os);
+    }
 };

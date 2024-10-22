@@ -28,7 +28,7 @@ int main()
         }
 
 #ifdef DEBUG
-        avl_tree.print();
+        std::cout << avl_tree << "\n";
 #endif
     }
     std::cout << "\n";
