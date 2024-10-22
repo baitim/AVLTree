@@ -17,6 +17,8 @@ jobs:
       run: sudo apt-get install libgtest-dev googletest googletest-tools google-mock
     - name: checkout repository
       uses: actions/checkout@v3
+    - name: update submodules
+      run: git submodule update --init --recursive
     - name: CMake release config
       run: cmake . -B build -DCMAKE_BUILD_TYPE=Release; cmake --build build
     - name: CMake release test
