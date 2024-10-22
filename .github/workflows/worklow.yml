@@ -1,0 +1,25 @@
+name: avl_tree pre-commit and post-push
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - name: install google test
+      run: sudo apt-get install libgtest-dev googletest googletest-tools google-mock
+    - name: CMake release config
+      run: cmake . -B build -DCMAKE_BUILD_TYPE=Realese; cmake --build build
+    - name: CMake release test
+      run: ctest --test-dir build
+    - name: CMake debug config
+      run: cmake . -B build -DCMAKE_BUILD_TYPE=Debug; cmake --build build
+    - name: CMake debug test
+      run: ctest --test-dir build
