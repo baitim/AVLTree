@@ -85,8 +85,8 @@ class avl_tree_t final {
     class const_avl_node_it final {
         using iterator_category = std::forward_iterator_tag;
         using value_type        = KeyT;
-        using pointer           = value_type*;
-        using reference         = value_type&;
+        using pointer           = const value_type*;
+        using reference         = const value_type&;
         using difference_type   = std::ptrdiff_t;
 
         avl_node* node_;
@@ -95,22 +95,12 @@ class avl_tree_t final {
         const_avl_node_it(const avl_node_it& node_it)  : node_(std::addressof(*node_it)) {}
         const_avl_node_it(const unique_avl_node& node) : node_(node.get()) {}
 
-        reference operator*() {
+        reference operator*() const {
             if (node_) return node_->key_;
             throw std::invalid_argument("nullptr->");
         }
 
-        const reference operator*() const {
-            if (node_) return node_->key_;
-            throw std::invalid_argument("nullptr->");
-        }
-
-        pointer operator->() {
-            if (node_) return std::addressof(node_->key_);
-            throw std::invalid_argument("nullptr->");
-        }
-
-        const pointer operator->() const {
+        pointer operator->() const {
             if (node_) return std::addressof(node_->key_);
             throw std::invalid_argument("nullptr->");
         }
