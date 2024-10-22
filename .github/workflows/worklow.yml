@@ -15,6 +15,8 @@ jobs:
     steps:
     - name: install google test
       run: sudo apt-get install libgtest-dev googletest googletest-tools google-mock
+    - name: Checkout repository
+      uses: actions/checkout@something
     - name: CMake release config
       run: cmake . -B build -DCMAKE_BUILD_TYPE=Release; cmake --build build
     - name: CMake release test
