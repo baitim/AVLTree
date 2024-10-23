@@ -11,16 +11,28 @@ int main()
     auto time_start = clock::now().time_since_epoch().count();
     char command;
     while(std::cin >> command) {
+        if (!std::cin.good()) {
+            std::cout << print_red("Error input, need command as char\n");
+            return 1;
+        }
 
         int first_key, second_key, answer;
         switch (command) {
             case 'k':
                 std::cin >> first_key;
+                if (!std::cin.good() && !std::cin.eof()) {
+                    std::cout << print_red("Error input, need key as int\n");
+                    return 1;
+                }
                 set.insert(first_key);
                 break;
 
             case 'q':
                 std::cin >> first_key >> second_key;
+                if (!std::cin.good() && !std::cin.eof()) {
+                    std::cout << print_red("Error input, need key as int\n");
+                    return 1;
+                }
                 if (first_key < second_key)
                     answer = std::distance(set.lower_bound(first_key), set.upper_bound(second_key));
                 NO_OPT(answer);
@@ -28,8 +40,8 @@ int main()
                 break;
 
             default:
-                std::cerr << print_lred("Error input, need key \"k\" or \"q\"\n");
-                return 0;
+                std::cout << print_red("Error input, need command: \"k\" or \"q\"\n");
+                return 1;
         }
     }
     auto time_end = clock::now().time_since_epoch().count();

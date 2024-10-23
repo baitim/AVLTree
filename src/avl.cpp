@@ -8,23 +8,35 @@ int main()
 
     char command;
     while(std::cin >> command) {
+        if (!std::cin.good()) {
+            std::cout << print_red("Error input, need command as char\n");
+            return 1;
+        }
 
         int first_key, second_key, answer;
         switch (command) {
             case 'k':
                 std::cin >> first_key;
+                if (!std::cin.good() && !std::cin.eof()) {
+                    std::cout << print_red("Error input, need key as int\n");
+                    return 1;
+                }
                 avl_tree.insert(first_key);
                 break;
 
             case 'q':
                 std::cin >> first_key >> second_key;
+                if (!std::cin.good() && !std::cin.eof()) {
+                    std::cout << print_red("Error input, need key as int\n");
+                    return 1;
+                }
                 answer = avl_tree.check_range(first_key, second_key);
                 std::cout << answer << ' ';
                 break;
 
             default:
-                std::cerr << print_lred("Error input, need key \"k\" or \"q\"\n");
-                return 0;
+                std::cout << print_red("Error input, need command: \"k\" or \"q\"\n");
+                return 1;
         }
 
 #ifdef DEBUG
