@@ -31,7 +31,7 @@ class avl_tree_t final {
         }
     };
 
-    class avl_node_it final {
+    class internal_iterator final {
         using iterator_category = std::forward_iterator_tag;
         using value_type        = avl_node;
         using pointer           = value_type*;
@@ -41,17 +41,17 @@ class avl_tree_t final {
         pointer node_ = nullptr;
 
     public:
-        avl_node_it() {}
-        avl_node_it(const avl_node_it& node_it)  : node_(std::addressof(*node_it)) {}
-        avl_node_it(reference node)              : node_(&node)      {}
-        avl_node_it(pointer   node)              : node_(node)       {}
-        avl_node_it(const unique_avl_node& node) : node_(node.get()) {}
+        internal_iterator() {}
+        internal_iterator(const internal_iterator& node_it)  : node_(std::addressof(*node_it)) {}
+        internal_iterator(reference node)                    : node_(&node)      {}
+        internal_iterator(pointer   node)                    : node_(node)       {}
+        internal_iterator(const unique_avl_node& node)       : node_(node.get()) {}
 
-        avl_node_it& operator=(const unique_avl_node& node) {
+        internal_iterator& operator=(const unique_avl_node& node) {
             if (node_ == node.get())
                 return *this;
 
-            *this = avl_node_it{node};
+            *this = internal_iterator{node};
             return *this;
         }
 
@@ -70,22 +70,22 @@ class avl_tree_t final {
         pointer operator->()             noexcept { return node_; }
         const pointer operator->() const noexcept { return node_; }
 
-        bool operator==(const avl_node_it& rhs) const noexcept {
+        bool operator==(const internal_iterator& rhs) const noexcept {
             return (rhs.node_ == node_);
         }
 
-        bool operator!=(const avl_node_it& rhs) const noexcept {
+        bool operator!=(const internal_iterator& rhs) const noexcept {
             return !(rhs.node_ == node_);
         }
 
-        avl_node_it& operator++() noexcept {
+        internal_iterator& operator++() noexcept {
             if (is_valid())
                 node_ = node_->parent_;
             return *this;
         }
     };
 
-    class const_avl_node_it final {
+    class external_iterator final {
         using iterator_category = std::forward_iterator_tag;
         using value_type        = KeyT;
         using pointer           = const value_type*;
@@ -95,8 +95,8 @@ class avl_tree_t final {
         avl_node* node_;
 
     public:
-        const_avl_node_it(const avl_node_it& node_it)  : node_(std::addressof(*node_it)) {}
-        const_avl_node_it(const unique_avl_node& node) : node_(node.get()) {}
+        external_iterator(const internal_iterator& node_it)  : node_(std::addressof(*node_it)) {}
+        external_iterator(const unique_avl_node& node) : node_(node.get()) {}
 
         reference operator*() const {
             if (node_) return node_->key_;
@@ -108,15 +108,15 @@ class avl_tree_t final {
             throw std::invalid_argument("nullptr->");
         }
 
-        bool operator==(const avl_node_it& rhs) const noexcept {
+        bool operator==(const internal_iterator& rhs) const noexcept {
             return (rhs.node_ == node_);
         }
 
-        bool operator!=(const avl_node_it& rhs) const noexcept {
+        bool operator!=(const internal_iterator& rhs) const noexcept {
             return !(rhs.node_ == node_);
         }
 
-        const_avl_node_it& operator++() noexcept {
+        external_iterator& operator++() noexcept {
             if (node_)
                 node_ = node_->parent_;
             return *this;
@@ -124,17 +124,17 @@ class avl_tree_t final {
     };
 
     class ascending_range final {
-        avl_node_it node_;
+        internal_iterator node_;
 
     public:
-        ascending_range(const avl_node_it node) : node_(node) {}
+        ascending_range(const internal_iterator node) : node_(node) {}
 
-        avl_node_it begin() const {
+        internal_iterator begin() const {
             return node_;
         }
 
-        avl_node_it end() const {
-            return avl_node_it{nullptr};
+        internal_iterator end() const {
+            return internal_iterator{nullptr};
         }
     };
 
@@ -143,21 +143,21 @@ class avl_tree_t final {
     KeyT max_key_;
 
 private:
-    int get_node_size(avl_node_it node) const noexcept {
+    int get_node_size(internal_iterator node) const noexcept {
         if (!node.is_valid())
             return 0;
 
         return node->Nleft_ + node->Nright_ + 1;
     }
 
-    void update_Nchilds(avl_node_it node) {
+    void update_Nchilds(internal_iterator node) {
         for (auto& node_ : ascending_range{node}) {
             node_.Nleft_  = get_node_size(node_.left_);
             node_.Nright_ = get_node_size(node_.right_);
         }
     }
 
-    void update_height(avl_node_it node) {
+    void update_height(internal_iterator node) {
         for (auto& node_ : ascending_range{node}) {
             node_.height_ = 0;
             if (node_.left_)
@@ -169,7 +169,7 @@ private:
         }
     }
 
-    unique_avl_node& get_unique_ptr(avl_node_it node, avl_node_it parent) {
+    unique_avl_node& get_unique_ptr(internal_iterator node, internal_iterator parent) {
         if (std::addressof(*node) == root_.get()) {
             return root_;
         } else {
@@ -180,7 +180,7 @@ private:
         }
     }
 
-    void balance(avl_node_it node) {
+    void balance(internal_iterator node) {
         if (!node.is_valid())
             return;
 
@@ -195,7 +195,7 @@ private:
         int left_height = 0;
         int right_height = 0;
         if (balance_diff > 1) {
-            avl_node_it left = *node->left_;
+            internal_iterator left = *node->left_;
             if (left->left_)
                 left_height = left->left_->height_;
 
@@ -207,7 +207,7 @@ private:
             destination = rotate_right(std::move(destination));
 
         } else if (balance_diff < -1) {
-            avl_node_it right = *node->right_;
+            internal_iterator right = *node->right_;
             if (right->left_)
                 left_height = right->left_->height_;
 
@@ -280,8 +280,8 @@ private:
         return new_node;
     }
 
-    avl_node_it get_parent_min_bigger(avl_node_it node, const KeyT& key) const {
-        avl_node_it ans_node = node;
+    internal_iterator get_parent_min_bigger(internal_iterator node, const KeyT& key) const {
+        internal_iterator ans_node = node;
         KeyT        ans_key  = max_key_;
         for (auto& node_ : ascending_range{node}) {
             if (comp_func(key,        node_.key_) &&
@@ -294,11 +294,11 @@ private:
         return ans_node;
     }
 
-    avl_node_it lower_bound(const KeyT& key) const {
+    internal_iterator lower_bound(const KeyT& key) const {
         if (!root_)
             return nullptr;
 
-        avl_node_it current = *root_;
+        internal_iterator current = *root_;
         while (current.is_valid()) {
             if (comp_func(key, current->key_)) {
                 if (current->left_)
@@ -317,11 +317,11 @@ private:
         return current;
     }
 
-    avl_node_it upper_bound(const KeyT& key) const {
+    internal_iterator upper_bound(const KeyT& key) const {
         if (!root_)
             return nullptr;
 
-        avl_node_it current = *root_;
+        internal_iterator current = *root_;
         while (current.is_valid()) {
             if (comp_func(key, current->key_)) {
                 if (current->left_)
@@ -343,7 +343,7 @@ private:
             return 0;
 
         int dist = 0;
-        avl_node_it current = *root_;
+        internal_iterator current = *root_;
         while (current.is_valid()) {
             if (comp_func(key, current->key_)) {
                 if (current->left_)
@@ -363,7 +363,7 @@ private:
         return dist;
     }
 
-    std::ostream& print_node(std::ostream& os, avl_node_it node) const noexcept {
+    std::ostream& print_node(std::ostream& os, internal_iterator node) const noexcept {
         if (!node.is_valid())
             return os;
 
@@ -389,18 +389,18 @@ private:
         return os;
     }
 
-    std::ostream& print_subtree(std::ostream& os, avl_node_it node) const {
+    std::ostream& print_subtree(std::ostream& os, internal_iterator node) const {
         if (!node.is_valid())
             return os;
 
         int used_size = std::pow(2, std::log2(get_node_size(node)) + 1);
         std::vector<bool> used(used_size, false);
 
-        avl_node_it current = node;
+        internal_iterator current = node;
         int current_index = 1;
         while (current.is_valid()) {
 
-            avl_node_it left_it = current->left_;
+            internal_iterator left_it = current->left_;
             if (left_it.is_valid() &&
                 !used[current_index * 2]) {
                 current = current->left_;
@@ -412,7 +412,7 @@ private:
                 print_node(os, current);
             used[current_index] = true;
 
-            avl_node_it right_it = current->right_;
+            internal_iterator right_it = current->right_;
             if (right_it.is_valid() &&
                 !used[current_index * 2 + 1]) {
                 current = current->right_;
@@ -426,7 +426,7 @@ private:
         return os;
     }
 
-    void decrement_parents_size(avl_node_it node) {
+    void decrement_parents_size(internal_iterator node) {
         for (auto& node_ : ascending_range{node}) {
             if (!node_.parent_)
                 break;
@@ -438,11 +438,11 @@ private:
         }
     }
 
-    avl_node_it find(const KeyT& key) const {
+    internal_iterator find(const KeyT& key) const {
         if (!root_)
             return 0;
 
-        avl_node_it current = *root_;
+        internal_iterator current = *root_;
         while (current.is_valid()) {
             if (comp_func(key, current->key_)) {
                 if (current->left_)
@@ -465,12 +465,12 @@ public:
     avl_tree_t(const KeyT& max_key) : max_key_(max_key) {}
 
     avl_tree_t(const avl_tree_t<KeyT, CompT>& other) {
-        avl_node_it curr_other = other.root_;
+        internal_iterator curr_other = other.root_;
         if (!curr_other.is_valid())
             return;
 
         root_ = std::make_unique<avl_node>(other.root_->key_);
-        avl_node_it curr_this = root_;
+        internal_iterator curr_this = root_;
 
         while (curr_other.is_valid()) {
 
@@ -535,14 +535,14 @@ public:
         return os;
     }
 
-    const_avl_node_it insert(const KeyT& key) {
+    external_iterator insert(const KeyT& key) {
         if (!root_) {
             root_ = std::make_unique<avl_node>(key);
             return root_;
         }
 
-        avl_node_it current     = *root_;
-        avl_node_it destination = *root_;
+        internal_iterator current     = *root_;
+        internal_iterator destination = *root_;
         while (current.is_valid()) {
             if (comp_func(key, current->key_)) {
                 if (current->left_) {
@@ -580,8 +580,8 @@ public:
         if (first_key >= second_key || !root_)
             return 0;
 
-        avl_node_it left  = lower_bound(first_key);
-        avl_node_it right = upper_bound(second_key);
+        internal_iterator left  = lower_bound(first_key);
+        internal_iterator right = upper_bound(second_key);
 
         int border = -1;
         if (first_key <= left->key_)
@@ -596,7 +596,7 @@ public:
         if (!root_)
             return;
 
-        avl_node_it current = root_;
+        internal_iterator current = root_;
         while (current.is_valid()) {
             if (current->Nleft_ > 0) {
                 int node_left_size = get_node_size(current->left_);
