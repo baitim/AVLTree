@@ -26,6 +26,9 @@ class avl_tree_t final {
         unique_avl_node right_;
 
         avl_node(const KeyT& key) : key_(key) {}
+        ~avl_node() {
+            key_.~KeyT();
+        }
     };
 
     class avl_node_it final {
@@ -140,21 +143,21 @@ class avl_tree_t final {
     KeyT max_key_;
 
 private:
-    int get_node_size(const avl_node_it node) const noexcept {
+    int get_node_size(avl_node_it node) const noexcept {
         if (!node.is_valid())
             return 0;
 
         return node->Nleft_ + node->Nright_ + 1;
     }
 
-    void update_Nchilds(const avl_node_it node) {
+    void update_Nchilds(avl_node_it node) {
         for (auto& node_ : ascending_range{node}) {
             node_.Nleft_  = get_node_size(node_.left_);
             node_.Nright_ = get_node_size(node_.right_);
         }
     }
 
-    void update_height(const avl_node_it node) {
+    void update_height(avl_node_it node) {
         for (auto& node_ : ascending_range{node}) {
             node_.height_ = 0;
             if (node_.left_)
@@ -166,7 +169,7 @@ private:
         }
     }
 
-    unique_avl_node& get_unique_ptr(const avl_node_it node, avl_node_it parent) {
+    unique_avl_node& get_unique_ptr(avl_node_it node, avl_node_it parent) {
         if (std::addressof(*node) == root_.get()) {
             return root_;
         } else {
@@ -277,7 +280,7 @@ private:
         return new_node;
     }
 
-    avl_node_it get_parent_min_bigger(const avl_node_it node, const KeyT& key) const {
+    avl_node_it get_parent_min_bigger(avl_node_it node, const KeyT& key) const {
         avl_node_it ans_node = node;
         KeyT        ans_key  = max_key_;
         for (auto& node_ : ascending_range{node}) {
@@ -360,7 +363,7 @@ private:
         return dist;
     }
 
-    std::ostream& print_node(std::ostream& os, const avl_node_it node) const noexcept {
+    std::ostream& print_node(std::ostream& os, avl_node_it node) const noexcept {
         if (!node.is_valid())
             return os;
 
@@ -386,7 +389,7 @@ private:
         return os;
     }
 
-    std::ostream& print_subtree(std::ostream& os, const avl_node_it node) const {
+    std::ostream& print_subtree(std::ostream& os, avl_node_it node) const {
         if (!node.is_valid())
             return os;
 
@@ -423,7 +426,7 @@ private:
         return os;
     }
 
-    void decrement_parents_size(const avl_node_it node) {
+    void decrement_parents_size(avl_node_it node) {
         for (auto& node_ : ascending_range{node}) {
             if (!node_.parent_)
                 break;
