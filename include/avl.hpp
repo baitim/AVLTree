@@ -95,8 +95,8 @@ class avl_tree_t final {
         avl_node* node_;
 
     public:
-        external_iterator(const internal_iterator& node_it)  : node_(std::addressof(*node_it)) {}
-        external_iterator(const unique_avl_node& node) : node_(node.get()) {}
+        external_iterator(const internal_iterator& node_it) : node_(std::addressof(*node_it)) {}
+        external_iterator(const unique_avl_node& node)      : node_(node.get()) {}
 
         reference operator*() const {
             if (node_) return node_->key_;
