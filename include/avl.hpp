@@ -112,7 +112,7 @@ public:
         external_iterator get_root_iter() const {
             external_iterator current = node_;
             while (current.is_valid() &&
-                current.is_parent_valid())
+                   current.is_parent_valid())
                 ++current;
 
             return current;
