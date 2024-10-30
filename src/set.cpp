@@ -32,7 +32,7 @@ int main()
                 if (first_key >= second_key)
                     answer = 0;
                 else 
-                    answer = std::distance(set.lower_bound(first_key), set.upper_bound(second_key));
+                    answer = distance(set.lower_bound(first_key), set.upper_bound(second_key));
                 std::cout << answer << ' ';
                 
                 break;

@@ -59,11 +59,20 @@ TEST(AVL_tree_main, test_simple)
 
     avl.insert(10);
     avl.insert(20);
-    ASSERT_EQ(avl.check_range(8, 31), 2);
-    ASSERT_EQ(avl.check_range(6, 9), 0);
+    ASSERT_EQ(distance<int>(avl.lower_bound(8), avl.upper_bound(31)), 2);
+    ASSERT_EQ(distance<int>(avl.lower_bound(6), avl.upper_bound(9)),  0);
     avl.insert(30);
     avl.insert(40);
-    ASSERT_EQ(avl.check_range(15, 40), 3);
+    ASSERT_EQ(distance<int>(avl.lower_bound(15), avl.upper_bound(40)), 3);
+}
+
+TEST(AVL_tree_main, test_simple2)
+{
+    avl_tree::avl_tree_t<int> avl{INT32_MAX};
+
+    avl.insert(10);
+    avl.insert(4);
+    ASSERT_EQ(distance<int>(avl.lower_bound(2), avl.upper_bound(6)), 1);
 }
 
 TEST(AVL_tree_main, test_copy_ctor)
@@ -77,9 +86,9 @@ TEST(AVL_tree_main, test_copy_ctor)
         avl = avl2;
     }
 
-    EXPECT_EQ(avl.check_range(2, 3), 2);
-    EXPECT_EQ(avl.check_range(8, 6), 0);
-    EXPECT_EQ(avl.check_range(1, 9), 9);
+    EXPECT_EQ(distance<int>(avl.lower_bound(2), avl.upper_bound(3)), 2);
+    EXPECT_EQ(distance<int>(avl.lower_bound(8), avl.upper_bound(6)), 0);
+    EXPECT_EQ(distance<int>(avl.lower_bound(1), avl.upper_bound(9)), 9);
 }
 
 TEST(AVL_tree_raii, test_copy_assign_ctor)
@@ -99,8 +108,9 @@ TEST(AVL_tree_raii, test_copy_assign_ctor)
         avl = avl2;
     }
 
-    EXPECT_EQ(avl.check_range(0, 4),  3);
-    EXPECT_EQ(avl.check_range(5, 22), 0);
+    EXPECT_EQ(distance<int>(avl.lower_bound(3), avl.upper_bound(6)),  1);
+    EXPECT_EQ(distance<int>(avl.lower_bound(0), avl.upper_bound(4)),  3);
+    EXPECT_EQ(distance<int>(avl.lower_bound(5), avl.upper_bound(22)), 0);
 }
 
 TEST(AVL_tree_raii, test_move_assign_ctor)
@@ -114,23 +124,23 @@ TEST(AVL_tree_raii, test_move_assign_ctor)
 
     std::swap(avl, avl2);
 
-    EXPECT_EQ(avl2.check_range(-1, 5),  0);
-    EXPECT_EQ(avl2.check_range( 7, 33), 3);
-    EXPECT_EQ(avl.check_range(-100, 100), 0);
+    EXPECT_EQ(distance<int>(avl2.lower_bound(-1),  avl2.upper_bound(5)),  0);
+    EXPECT_EQ(distance<int>(avl2.lower_bound( 7),  avl2.upper_bound(33)), 3);
+    EXPECT_EQ(distance<int>(avl.lower_bound(-100), avl.upper_bound(100)), 0);
 }
 
 TEST_F(AVLFixture, test_simple_borders)
 {   
-    EXPECT_EQ(avl.check_range(0, 3), 4);
-    EXPECT_EQ(avl.check_range(2, 6), 5);
-    EXPECT_EQ(avl.check_range(4, 9), 6);
+    EXPECT_EQ(distance<int>(avl.lower_bound(0), avl.upper_bound(3)), 4);
+    EXPECT_EQ(distance<int>(avl.lower_bound(2), avl.upper_bound(6)), 5);
+    EXPECT_EQ(distance<int>(avl.lower_bound(4), avl.upper_bound(9)), 6);
 }
 
 TEST_F(AVLFixture, test_going_beyond_borders)
 {   
-    EXPECT_EQ(avl.check_range(-4, 3), 4);
-    EXPECT_EQ(avl.check_range(2, 21), 8);
-    EXPECT_EQ(avl.check_range(-26, 37), 10);
+    EXPECT_EQ(distance<int>(avl.lower_bound(-4),  avl.upper_bound(3)),  4);
+    EXPECT_EQ(distance<int>(avl.lower_bound(2),   avl.upper_bound(21)), 8);
+    EXPECT_EQ(distance<int>(avl.lower_bound(-26), avl.upper_bound(37)), 10);
 }
 
 TEST_F(AVLFixture, test_repeats)
@@ -141,12 +151,11 @@ TEST_F(AVLFixture, test_repeats)
     for (int i = 0; i < 5; i++) 
         avl.insert(5);
     
-    ASSERT_EQ(avl.check_range(4, 5), 2);
+    ASSERT_EQ(distance<int>(avl.lower_bound(4), avl.upper_bound(5)), 2);
 }
 
 TEST_F(AVLFixture, test_left_bigger_right)
-{   
-    EXPECT_EQ(avl.check_range(51, 10), 0);
-    EXPECT_EQ(avl.check_range(3, 3),   0);
-    EXPECT_EQ(avl.check_range(46, 7),  0);
+{
+    EXPECT_EQ(distance<int>(avl.lower_bound(51), avl.upper_bound(10)), 0);
+    EXPECT_EQ(distance<int>(avl.lower_bound(46), avl.upper_bound(7)),  0);
 }

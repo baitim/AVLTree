@@ -43,7 +43,7 @@ class avl_tree_t final {
     public:
         internal_iterator() {}
         internal_iterator(const internal_iterator& node_it)  : node_(std::addressof(*node_it)) {}
-        internal_iterator(reference node)                    : node_(&node)      {}
+        internal_iterator(reference node)                    : node_(std::addressof(node))     {}
         internal_iterator(pointer   node)                    : node_(node)       {}
         internal_iterator(const unique_avl_node& node)       : node_(node.get()) {}
 
@@ -85,8 +85,9 @@ class avl_tree_t final {
         }
     };
 
+public:
     class external_iterator final {
-        using iterator_category = std::forward_iterator_tag;
+        using iterator_category = std::bidirectional_iterator_tag;
         using value_type        = KeyT;
         using pointer           = const value_type*;
         using reference         = const value_type&;
@@ -95,8 +96,16 @@ class avl_tree_t final {
         avl_node* node_;
 
     public:
-        external_iterator(const internal_iterator& node_it) : node_(std::addressof(*node_it)) {}
-        external_iterator(const unique_avl_node& node)      : node_(node.get()) {}
+        external_iterator(const internal_iterator& node) : node_(std::addressof(*node)) {}
+        external_iterator(avl_node& node)                : node_(std::addressof(node))  {}
+        external_iterator(avl_node* node)                : node_(node)  {}
+        external_iterator(const unique_avl_node& node)   : node_(node.get()) {}
+
+        bool is_valid()        const { return (node_          ? true : false); }
+        bool is_parent_valid() const { return (node_->parent_ ? true : false); }
+        
+        int get_Nleft() const { return node_->Nleft_; }
+        int get_size()  const { return node_->Nleft_ + node_->Nright_ + 1; }
 
         reference operator*() const {
             if (node_) return node_->key_;
@@ -108,11 +117,11 @@ class avl_tree_t final {
             throw std::invalid_argument("nullptr->");
         }
 
-        bool operator==(const internal_iterator& rhs) const noexcept {
+        bool operator==(const external_iterator& rhs) const noexcept {
             return (rhs.node_ == node_);
         }
 
-        bool operator!=(const internal_iterator& rhs) const noexcept {
+        bool operator!=(const external_iterator& rhs) const noexcept {
             return !(rhs.node_ == node_);
         }
 
@@ -121,8 +130,22 @@ class avl_tree_t final {
                 node_ = node_->parent_;
             return *this;
         }
+
+        external_iterator& operator--() noexcept {
+            if (node_)
+                node_ = node_->right_.get();
+            return *this;
+        }
+
+        external_iterator operator--(int) noexcept {
+            auto tmp = *this;
+            if (node_)
+                node_ = node_->left_.get();
+            return tmp;
+        }
     };
 
+private:
     class ascending_range final {
         internal_iterator node_;
 
@@ -138,7 +161,6 @@ class avl_tree_t final {
         }
     };
 
-    CompT comp_func;
     unique_avl_node root_;
     KeyT max_key_;
 
@@ -173,7 +195,7 @@ private:
         if (std::addressof(*node) == root_.get()) {
             return root_;
         } else {
-            if (comp_func(node->key_, parent->key_))
+            if (CompT()(node->key_, parent->key_))
                 return parent->left_;
             else
                 return parent->right_;
@@ -278,64 +300,6 @@ private:
         update_height (new_node->left_);
         update_Nchilds(new_node->left_);
         return new_node;
-    }
-
-    internal_iterator get_parent_min_bigger(internal_iterator node, const KeyT& key) const {
-        internal_iterator ans_node = node;
-        KeyT        ans_key  = max_key_;
-        for (auto& node_ : ascending_range{node}) {
-            if (comp_func(key,        node_.key_) &&
-                comp_func(node_.key_, ans_key)) {
-
-                ans_node = node_;
-                ans_key  = node_.key_;
-            }
-        }
-        return ans_node;
-    }
-
-    internal_iterator lower_bound(const KeyT& key) const {
-        if (!root_)
-            return nullptr;
-
-        internal_iterator current = *root_;
-        while (current.is_valid()) {
-            if (comp_func(key, current->key_)) {
-                if (current->left_)
-                    current = current->left_;
-                else
-                    return get_parent_min_bigger(current, key);
-            } else if (comp_func(current->key_, key)) {
-                if (current->right_)
-                    current = current->right_;
-                else
-                    return get_parent_min_bigger(current, key);
-            } else {
-                return current;
-            }
-        }
-        return current;
-    }
-
-    internal_iterator upper_bound(const KeyT& key) const {
-        if (!root_)
-            return nullptr;
-
-        internal_iterator current = *root_;
-        while (current.is_valid()) {
-            if (comp_func(key, current->key_)) {
-                if (current->left_)
-                    current = current->left_;
-                else
-                    return get_parent_min_bigger(current, key);
-            } else {
-                if (current->right_)
-                    current = current->right_;
-                else
-                    return get_parent_min_bigger(current, key);
-            }
-        }
-        return current;
     }
 
     int size_left_side(const KeyT& key) const {
@@ -444,12 +408,12 @@ private:
 
         internal_iterator current = *root_;
         while (current.is_valid()) {
-            if (comp_func(key, current->key_)) {
+            if (CompT()(key, current->key_)) {
                 if (current->left_)
                     current = current->left_;
                 else
                     return *current;
-            } else if (comp_func(current->key_, key)) {
+            } else if (CompT()(current->key_, key)) {
                 if (current->right_)
                     current = current->right_;
                 else
@@ -508,8 +472,7 @@ public:
         return *this;
     }
 
-    avl_tree_t(avl_tree_t<KeyT, CompT>&& other) noexcept : comp_func(std::move(other.comp_func)),
-                                                           root_    (std::move(other.root_)), 
+    avl_tree_t(avl_tree_t<KeyT, CompT>&& other) noexcept : root_    (std::move(other.root_)), 
                                                            max_key_ (std::move(other.max_key_)) {
         other.root_ = nullptr;
     }
@@ -518,7 +481,6 @@ public:
         if (this == &other)
             return *this;
 
-        std::swap(comp_func, other.comp_func);
         std::swap(root_,     other.root_);
         std::swap(max_key_,  other.max_key_);
         return *this;
@@ -544,7 +506,7 @@ public:
         internal_iterator current     = *root_;
         internal_iterator destination = *root_;
         while (current.is_valid()) {
-            if (comp_func(key, current->key_)) {
+            if (CompT()(key, current->key_)) {
                 if (current->left_) {
                     current = current->left_;
                 } else {
@@ -553,7 +515,7 @@ public:
                     destination = current->left_;
                     break;
                 }
-            } else if (comp_func(current->key_, key)) {
+            } else if (CompT()(current->key_, key)) {
                 if (current->right_) {
                     current = current->right_;
                 } else {
@@ -576,20 +538,50 @@ public:
         return find(destination->key_);
     }
 
-    int check_range(const KeyT& first_key, const KeyT& second_key) const {
-        if (first_key >= second_key || !root_)
-            return 0;
+    external_iterator lower_bound(const KeyT& key) const {
+        if (!root_)
+            return end();
 
-        internal_iterator left  = lower_bound(first_key);
-        internal_iterator right = upper_bound(second_key);
+        internal_iterator current = *root_;
+        internal_iterator result = current;
+        while (current.is_valid()) {
+            if (!CompT()(current->key_, key)) {
+                result  = current;
+                current = current->left_;
+            } else if (!CompT()(key, current->key_)) {
+                current = current->right_;
+            } else {
+                return current;
+            }
+        }
+        if (CompT()(result->key_, key))
+            return end();
 
-        int border = -1;
-        if (first_key <= left->key_)
-            border++;
-        if (second_key >= right->key_)
-            border++;
+        return result;
+    }
 
-        return size_left_side(right->key_) - size_left_side(left->key_) + border;
+    external_iterator upper_bound(const KeyT& key) const {
+        if (!root_)
+            return end();
+
+        internal_iterator current = *root_;
+        internal_iterator result = current;
+        while (current.is_valid()) {
+            if (CompT()(key, current->key_)) {
+                result  = current;
+                current = current->left_;
+            } else {
+                current = current->right_;
+            }
+        }
+        if (!CompT()(key, result->key_))
+            return end();
+
+        return result;
+    }
+
+    external_iterator end() const {
+        return nullptr;
     }
 
     ~avl_tree_t() {
@@ -626,5 +618,51 @@ public:
     template <typename KeyT, typename CompT>
     std::ostream& operator<<(std::ostream& os, const avl_tree_t<KeyT, CompT>& avl_tree) {
         return avl_tree.print(os);
+    }
+
+    template <typename KeyT, typename CompT = std::less<KeyT>>
+    typename avl_tree_t<KeyT, CompT>::external_iterator
+    get_root_iter(const typename avl_tree_t<KeyT, CompT>::external_iterator& node) {
+        typename avl_tree_t<KeyT, CompT>::external_iterator current = node;
+        while (current.is_valid() &&
+               current.is_parent_valid())
+            ++current;
+
+        return current;
+    }
+
+    template <typename KeyT, typename CompT = std::less<KeyT>>
+    int get_count_less(const typename avl_tree_t<KeyT, CompT>::external_iterator& node) {
+        int dist = 0;
+        typename avl_tree_t<KeyT, CompT>::external_iterator current = get_root_iter<KeyT, CompT>(node);
+
+        while (current.is_valid()) {
+            if (CompT()(*node, *current)) {
+                current--;
+            } else if (CompT()(*current, *node)) {
+                dist += current.get_Nleft() + 1;
+                --current;
+            } else {
+                return dist + current.get_Nleft();
+            }
+        }
+        return dist;
+    }
+
+    template <typename KeyT, typename CompT = std::less<KeyT>>
+    int distance(const typename avl_tree_t<KeyT, CompT>::external_iterator& first,
+                 const typename avl_tree_t<KeyT, CompT>::external_iterator& second) {
+        if (!first.is_valid())
+            return 0;
+
+        int count_less_first = get_count_less<KeyT, CompT>(first);
+
+        int count_less_second;
+        if (!second.is_valid())
+            count_less_second = get_root_iter<KeyT, CompT>(first).get_size();
+        else
+            count_less_second = get_count_less<KeyT, CompT>(second);
+
+        return std::max(0, count_less_second - count_less_first);
     }
 };

@@ -32,7 +32,9 @@ int main()
                     std::cout << print_red("Error input, need key as int\n");
                     return 1;
                 }
-                answer = avl_tree.check_range(first_key, second_key);
+                if (first_key >= second_key)
+                    answer = 0;
+                answer = distance<int>(avl_tree.lower_bound(first_key), avl_tree.upper_bound(second_key));
                 NO_OPT(answer);
                 break;
 
