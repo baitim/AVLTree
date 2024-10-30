@@ -10,7 +10,7 @@ std::vector<std::string> get_sorted_files(std::filesystem::path path) {
     for (const auto& entry : std::filesystem::directory_iterator(path))
         files.push_back(entry.path().string());
 
-    std::sort(files.begin(), files.end());
+    sort(files.begin(), files.end());
     return files;
 }
 
