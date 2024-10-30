@@ -32,7 +32,8 @@ int main()
                 }
                 if (first_key >= second_key)
                     answer = 0;
-                answer = distance(avl_tree.lower_bound(first_key), avl_tree.upper_bound(second_key));
+                else
+                    answer = distance(avl_tree.lower_bound(first_key), avl_tree.upper_bound(second_key));
                 std::cout << answer << ' ';
                 break;
 
