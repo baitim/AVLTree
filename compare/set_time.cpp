@@ -36,7 +36,6 @@ int main()
                 if (first_key < second_key)
                     answer = distance(set.lower_bound(first_key), set.upper_bound(second_key));
                 NO_OPT(answer);
-                
                 break;
 
             default:

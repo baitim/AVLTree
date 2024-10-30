@@ -32,9 +32,7 @@ int main()
                     std::cout << print_red("Error input, need key as int\n");
                     return 1;
                 }
-                if (first_key >= second_key)
-                    answer = 0;
-                else
+                if (first_key < second_key)
                     answer = distance(avl_tree.lower_bound(first_key), avl_tree.upper_bound(second_key));
                 NO_OPT(answer);
                 break;
@@ -43,10 +41,6 @@ int main()
                 std::cout << print_red("Error input, need command: \"k\" or \"q\"\n");
                 return 1;
         }
-
-#ifdef DEBUG
-        std::cout << avl_tree << "\n";
-#endif
     }
     auto time_end = clock::now().time_since_epoch().count();
     long double time = (static_cast<long double>(time_end - time_start)) * NSEC_TO_SEC;
