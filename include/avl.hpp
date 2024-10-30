@@ -96,6 +96,8 @@ public:
         avl_node* node_;
 
     public:
+        typedef CompT IterCompT;
+
         external_iterator(const internal_iterator& node) : node_(std::addressof(*node)) {}
         external_iterator(avl_node& node)                : node_(std::addressof(node))  {}
         external_iterator(avl_node* node)                : node_(node)  {}
@@ -620,10 +622,9 @@ public:
         return avl_tree.print(os);
     }
 
-    template <typename KeyT, typename CompT = std::less<KeyT>>
-    typename avl_tree_t<KeyT, CompT>::external_iterator
-    get_root_iter(const typename avl_tree_t<KeyT, CompT>::external_iterator& node) {
-        typename avl_tree_t<KeyT, CompT>::external_iterator current = node;
+    template <typename IterT>
+    IterT get_root_iter(const IterT& node) {
+        IterT current = node;
         while (current.is_valid() &&
                current.is_parent_valid())
             ++current;
@@ -631,10 +632,11 @@ public:
         return current;
     }
 
-    template <typename KeyT, typename CompT = std::less<KeyT>>
-    int get_count_less(const typename avl_tree_t<KeyT, CompT>::external_iterator& node) {
+    template <typename IterT>
+    int get_count_less(const IterT& node) {
         int dist = 0;
-        typename avl_tree_t<KeyT, CompT>::external_iterator current = get_root_iter<KeyT, CompT>(node);
+        IterT current = get_root_iter(node);
+        typedef typename IterT::IterCompT CompT;
 
         while (current.is_valid()) {
             if (CompT()(*node, *current)) {
@@ -649,19 +651,18 @@ public:
         return dist;
     }
 
-    template <typename KeyT, typename CompT = std::less<KeyT>>
-    int distance(const typename avl_tree_t<KeyT, CompT>::external_iterator& first,
-                 const typename avl_tree_t<KeyT, CompT>::external_iterator& second) {
+    template <typename IterT>
+    int distance(const IterT& first, const IterT& second) {
         if (!first.is_valid())
             return 0;
 
-        int count_less_first = get_count_less<KeyT, CompT>(first);
+        int count_less_first = get_count_less(first);
 
         int count_less_second;
         if (!second.is_valid())
-            count_less_second = get_root_iter<KeyT, CompT>(first).get_size();
+            count_less_second = get_root_iter(first).get_size();
         else
-            count_less_second = get_count_less<KeyT, CompT>(second);
+            count_less_second = get_count_less(second);
 
         return std::max(0, count_less_second - count_less_first);
     }
