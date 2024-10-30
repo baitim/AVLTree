@@ -109,6 +109,15 @@ public:
         int get_Nleft() const { return node_->Nleft_; }
         int get_size()  const { return node_->Nleft_ + node_->Nright_ + 1; }
 
+        external_iterator get_root_iter() const {
+            external_iterator current = node_;
+            while (current.is_valid() &&
+                current.is_parent_valid())
+                ++current;
+
+            return current;
+        }
+
         reference operator*() const {
             if (node_) return node_->key_;
             throw std::invalid_argument("nullptr->");
@@ -623,19 +632,9 @@ public:
     }
 
     template <typename IterT>
-    IterT get_root_iter(const IterT& node) {
-        IterT current = node;
-        while (current.is_valid() &&
-               current.is_parent_valid())
-            ++current;
-
-        return current;
-    }
-
-    template <typename IterT>
     int get_count_less(const IterT& node) {
         int dist = 0;
-        IterT current = get_root_iter(node);
+        IterT current = node.get_root_iter();
         typedef typename IterT::IterCompT CompT;
 
         while (current.is_valid()) {
@@ -660,7 +659,7 @@ public:
 
         int count_less_second;
         if (!second.is_valid())
-            count_less_second = get_root_iter(first).get_size();
+            count_less_second = first.get_root_iter().get_size();
         else
             count_less_second = get_count_less(second);
 
