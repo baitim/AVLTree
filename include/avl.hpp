@@ -96,8 +96,6 @@ public:
         avl_node* node_;
 
     public:
-        typedef CompT IterCompT;
-
         external_iterator(const internal_iterator& node) : node_(std::addressof(*node)) {}
         external_iterator(avl_node& node)                : node_(std::addressof(node))  {}
         external_iterator(avl_node* node)                : node_(node)  {}
@@ -116,6 +114,26 @@ public:
                 ++current;
 
             return current;
+        }
+
+        int get_count_less() const {
+            if (!is_valid())
+                return 0;
+
+            int dist = 0;
+            external_iterator current = get_root_iter();
+
+            while (current.is_valid()) {
+                if (CompT()(node_->key_, *current)) {
+                    current--;
+                } else if (CompT()(*current, node_->key_)) {
+                    dist += current.get_Nleft() + 1;
+                    --current;
+                } else {
+                    return dist + current.get_Nleft();
+                }
+            }
+            return dist;
         }
 
         reference operator*() const {
@@ -632,36 +650,17 @@ public:
     }
 
     template <typename IterT>
-    int get_count_less(const IterT& node) {
-        int dist = 0;
-        IterT current = node.get_root_iter();
-        typedef typename IterT::IterCompT CompT;
-
-        while (current.is_valid()) {
-            if (CompT()(*node, *current)) {
-                current--;
-            } else if (CompT()(*current, *node)) {
-                dist += current.get_Nleft() + 1;
-                --current;
-            } else {
-                return dist + current.get_Nleft();
-            }
-        }
-        return dist;
-    }
-
-    template <typename IterT>
     int distance(const IterT& first, const IterT& second) {
         if (!first.is_valid())
             return 0;
 
-        int count_less_first = get_count_less(first);
+        int count_less_first = first.get_count_less();
 
         int count_less_second;
         if (!second.is_valid())
             count_less_second = first.get_root_iter().get_size();
         else
-            count_less_second = get_count_less(second);
+            count_less_second = second.get_count_less();
 
         return std::max(0, count_less_second - count_less_first);
     }
