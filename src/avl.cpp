@@ -30,8 +30,6 @@ int main()
                     std::cout << print_red("Error input, need key as int\n");
                     return 1;
                 }
-                if (first_key >= second_key)
-                    answer = 0;
                 answer = distance<int>(avl_tree.lower_bound(first_key), avl_tree.upper_bound(second_key));
                 std::cout << answer << ' ';
                 break;
