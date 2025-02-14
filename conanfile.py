@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 
 
-class matrixRecipe(ConanFile):
+class avl_treeRecipe(ConanFile):
     name = "avl_tree"
     version = "1.0"
     user = "baitim"
