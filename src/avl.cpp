@@ -1,6 +1,6 @@
+#include "AVLTree/avl.hpp"
 #include <iostream>
 #include <cstdint>
-#include "avl.hpp"
 
 int main()
 {

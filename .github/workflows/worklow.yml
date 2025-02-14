@@ -1,27 +1,83 @@
-name: avl_tree pre-commit and post-push
+name: AVLTree pre-commit and post-push
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 jobs:
-  main:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-24.04
     defaults:
       run:
         shell: bash
     steps:
-    - name: checkout repository
-      uses: actions/checkout@v3
-    - name: update submodules
-      run: git submodule update --init --recursive
-    - name: CMake release config
-      run: cmake . -B build -DCMAKE_BUILD_TYPE=Release; cmake --build build
-    - name: CMake release test
-      run: ctest --test-dir build
-    - name: CMake debug config
-      run: cmake . -B build -DCMAKE_BUILD_TYPE=Debug; cmake --build build
-    - name: CMake debug test
-      run: ctest --test-dir build
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: set common environment
+        run: |
+          uv sync --group dev
+          source .venv/bin/activate
+          echo "VIRTUAL_ENV=$(pwd)/.venv" >> "$GITHUB_ENV"
+          echo "$(pwd)/.venv/bin" >> "$GITHUB_PATH"
+      
+      - name: setup conan
+        run: |
+          conan profile detect --force
+
+      - name: CMake release config
+        run: |
+          conan install . --build=missing -s compiler.cppstd=gnu20 -s build_type=Release
+          cmake --preset release
+          cmake --build build/Release
+
+      - name: CMake release test
+        run: ctest --test-dir build/Release --rerun-failed --output-on-failure
+
+      - name: CMake debug config
+        run: |
+          conan install . --build=missing -s compiler.cppstd=gnu20 -s build_type=Debug
+          cmake --preset debug
+          cmake --build build/Debug
+
+      - name: CMake debug test
+        run: ctest --test-dir build/Debug --rerun-failed --output-on-failure
+
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: set common environment
+        run: |
+          uv sync --group dev
+          source .venv/bin/activate
+          echo "VIRTUAL_ENV=$(pwd)/.venv" >> "$GITHUB_ENV"
+          echo "$(pwd)/.venv/bin" >> "$GITHUB_PATH"
+      
+      - name: setup conan
+        run: |
+          conan profile detect --force
+          conan remote add conan_packages ${{ secrets.CONAN_ADDRESS }}
+          CONAN_VISITOR="${{ secrets.CONAN_USERNAME }}\n${{ secrets.CONAN_PASSWORD }}"
+          echo -e "$CONAN_VISITOR" | conan remote login conan_packages
+
+      - name: create conan package
+        run: |
+          conan create . --build=missing -s build_type=Release
+          conan create . --build=missing -s build_type=Debug
+
+      - name: upload conan packages to server
+        run: |
+          conan upload avl_tree/1.0@baitim --remote conan_packages

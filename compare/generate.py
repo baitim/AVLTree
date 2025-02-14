@@ -1,8 +1,9 @@
 import random
 import os
+from pathlib import Path
 
-to_curr_dir = os.path.dirname(os.path.realpath(__file__))
-bench_in_dir = to_curr_dir + "/bench_in"
+cmp_dir = str(Path(__file__).parent)
+bench_in_dir = cmp_dir + "/bench_in"
 os.system("mkdir -p " + bench_in_dir)
 
 counts = []

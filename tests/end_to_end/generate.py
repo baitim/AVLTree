@@ -1,12 +1,11 @@
 import random
-import os
+from pathlib import Path
+
+tests_dir = str(Path(__file__).parent)
 
 count_tests = 5
-
-to_curr_dir = os.path.dirname(os.path.realpath(__file__))
-
 for test_num in range(0, count_tests) :
-    file_name = to_curr_dir + "/tests_in/test_" + f'{test_num+1:03}' + ".in"
+    file_name = tests_dir + "/tests_in/test_" + f'{test_num+1:03}' + ".in"
     file = open(file_name, 'w')
 
     count_inserts = random.randint(4000, 5000)

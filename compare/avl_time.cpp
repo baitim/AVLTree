@@ -1,6 +1,6 @@
-#include <iostream>
-#include "avl.hpp"
 #include "benchmark.hpp"
+#include "AVLTree/avl.hpp"
+#include <iostream>
 
 int main()
 {

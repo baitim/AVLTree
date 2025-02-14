@@ -1,8 +1,9 @@
+#include "AVLTree/avl.hpp"
+#include <algorithm>
 #include <iostream>
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <fstream>
-#include "avl.hpp"
 
 std::vector<std::string> get_sorted_files(std::filesystem::path path) {
     std::vector<std::string> files;
@@ -16,9 +17,10 @@ std::vector<std::string> get_sorted_files(std::filesystem::path path) {
 
 TEST(AVL_end_to_end, cmp_with_set) 
 {
-    std::filesystem::path dir = "../../../tests/end_to_end/";
-    std::filesystem::path answers_avl_path = dir / "answers_avl/";
-    std::filesystem::path answers_set_path = dir / "answers_set/";
+    std::string file{__FILE__};
+    std::filesystem::path dir = file.substr(0, file.rfind("/"));
+    std::filesystem::path answers_avl_path = dir / "../end_to_end/answers_avl/";
+    std::filesystem::path answers_set_path = dir / "../end_to_end/answers_set/";
 
     std::vector<std::string> answers_avl_str = get_sorted_files(answers_avl_path);
     std::vector<std::string> answers_set_str = get_sorted_files(answers_set_path);
@@ -158,4 +160,9 @@ TEST_F(AVLFixture, test_left_bigger_right)
 {
     EXPECT_EQ(distance(avl.lower_bound(51), avl.upper_bound(10)), 0);
     EXPECT_EQ(distance(avl.lower_bound(46), avl.upper_bound(7)),  0);
+}
+
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
