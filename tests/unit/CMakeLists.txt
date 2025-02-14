@@ -3,11 +3,15 @@ project(unit)
 
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 
-include_directories(${gtest_SOURCE_DIR})
+find_package(GTest REQUIRED)
 
 add_executable(unit_avl avl_unit_test.cpp)
-target_include_directories(unit_avl PUBLIC ${INCLUDE_DIR})
-target_link_libraries(unit_avl gtest gtest_main)
+target_sources(unit_avl
+    PRIVATE
+    FILE_SET HEADERS
+    BASE_DIRS ${INCLUDE_DIR}
+)
+target_link_libraries(unit_avl PRIVATE GTest::GTest)
 
 set(RUN_TESTS ./unit_avl --gtest_color=yes)
 add_test(

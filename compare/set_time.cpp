@@ -1,7 +1,7 @@
+#include "benchmark.hpp"
+#include "AVLTree/ANSI_colors.hpp"
 #include <iostream>
 #include <set>
-#include "ANSI_colors.hpp"
-#include "benchmark.hpp"
 
 int main()
 {

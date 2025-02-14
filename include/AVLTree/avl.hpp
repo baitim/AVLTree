@@ -1,12 +1,12 @@
 #pragma once
 
+#include "AVLTree/ANSI_colors.hpp"
 #include <functional>
 #include <memory>
 #include <vector>
 #include <cmath>
 #include <iterator>
 #include <exception>
-#include "ANSI_colors.hpp"
 
 namespace avl_tree {
 

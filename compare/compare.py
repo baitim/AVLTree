@@ -2,9 +2,12 @@ import os
 import glob
 import subprocess
 import matplotlib.pyplot as plt
+from pathlib import Path
 
-cmp_avl_exe = "../build/compare/cmp_avl"
-cmp_set_exe = "../build/compare/cmp_set"
+cmp_dir = str(Path(__file__).parent)
+
+cmp_avl_exe = cmp_dir + "../build/Release/compare/cmp_avl"
+cmp_set_exe = cmp_dir + "../build/Release/compare/cmp_set"
 
 files = list(map(str, glob.glob("bench_in/test_*.in")))
 files.sort()
